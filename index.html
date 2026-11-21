@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Renewable Energy Clock: World and Countries in Real Time</title>
+  <meta name="description" content="Watch the world's renewable electricity grow second by second. A live clock of solar, wind and hydro power for the world, China, the US, India, the EU and other major economies, based on official annual data from Ember and the Energy Institute.">
+  <link rel="canonical" href="https://ramialbatal.github.io/renewables-clock/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0b0f0e">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Renewables Clock">
+  <meta property="og:title" content="Live Renewable Energy Clock">
+  <meta property="og:description" content="Solar, wind and hydro electricity for the world and major economies, ticking in real time from official annual data.">
+  <meta property="og:url" content="https://ramialbatal.github.io/renewables-clock/">
+  <meta property="og:image" content="https://ramialbatal.github.io/renewables-clock/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Live Renewable Energy Clock">
+  <meta name="twitter:description" content="Solar, wind and hydro electricity for the world and major economies, ticking in real time from official annual data.">
+  <meta name="twitter:image" content="https://ramialbatal.github.io/renewables-clock/img/og-image.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Renewables Clock",
+    "alternateName": "Live Renewable Energy Clock",
+    "url": "https://ramialbatal.github.io/renewables-clock/",
+    "description": "A real-time clock estimating renewable electricity generated so far this year (solar, wind, hydro and other renewables) for the world and major economies, projected from official annual data.",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any (web browser)",
+    "isAccessibleForFree": true,
+    "inLanguage": "en",
+    "isBasedOn": [
+      { "@type": "Dataset", "name": "Yearly electricity data", "creator": { "@type": "Organization", "name": "Ember" }, "url": "https://ember-energy.org/data/yearly-electricity-data/" },
+      { "@type": "Dataset", "name": "Statistical Review of World Energy", "creator": { "@type": "Organization", "name": "Energy Institute" }, "url": "https://www.energyinst.org/statistical-review" }
+    ]
+  }
+  </script>
+  <link rel="stylesheet" href="css/style.css?v=20261121a">
+</head>
+<body data-state="loading" data-src="all">
+  <header class="top">
+    <div class="wrap">
+      <h1><span data-src-label>Renewable</span> Energy Clock</h1>
+      <p class="sub">Electricity generated so far in <span data-year></span>, estimated live, second by second</p>
+      <div class="gas-bar">
+        <div class="gas-switch" role="group" aria-label="Choose energy source">
+          <button type="button" data-src="all" aria-pressed="true">All</button>
+          <button type="button" data-src="solar" aria-pressed="false">Solar</button>
+          <button type="button" data-src="wind" aria-pressed="false">Wind</button>
+          <button type="button" data-src="hydro" aria-pressed="false">Hydro</button>
+        </div>
+        <button type="button" class="help-btn" data-open-help aria-haspopup="dialog">
+          <span aria-hidden="true">?</span><span class="sr-only">Why does renewable electricity matter?</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <noscript>
+    <div class="status">
+      <p><strong>This live clock needs JavaScript.</strong></p>
+      <p class="hint">It estimates renewable electricity generated so far this year (solar, wind, hydro and other
+        renewables) for the world and major economies by projecting the latest official annual figures from Ember and
+        the Energy Institute and spreading them evenly over the year.</p>
+    </div>
+  </noscript>
+
+  <div class="status loading-only" role="status">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Getting the latest official data…</p>
+    <p class="hint"><span data-source></span>, via Our World in Data</p>
+  </div>
+
+  <div class="status error-only" role="alert">
+    <p><strong>Couldn't load the electricity data.</strong></p>
+    <p class="hint" id="error-msg"></p>
+    <button id="retry" type="button">Try again</button>
+  </div>
+
+  <main class="wrap ready-only">
+    <section class="hero" aria-label="World total">
+      <p class="label">🌍 World · <span data-src-label></span> · year to date</p>
+      <div class="big" id="world-num">0</div>
+      <p class="unit">megawatt-hours (MWh) of <span data-src-long></span></p>
+      <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
+      <ul class="stats">
+        <li><b id="world-rate">0</b><span>MWh per second</span></li>
+        <li><b id="world-since">0</b><span>MWh since you opened this page</span></li>
+        <li><b><i id="world-pct">0</i>%</b><span>of <span data-year></span>'s projected <span id="world-annual"></span> TWh</span></li>
+      </ul>
+      <p class="basis">Based on <b id="world-official"></b> TWh officially reported for <span data-latest></span>,
+        growing <b id="world-growth"></b> on <span data-trend-from></span>.
+        That was <b id="world-share"></b> of the world's electricity, up from <b id="world-share-first"></b> in <span data-first></span>.</p>
+    </section>
+
+    <section aria-label="Countries">
+      <div class="bar-head">
+        <h2>Major economies</h2>
+        <label>Sort by
+          <select id="sort">
+            <option value="total">Total generation</option>
+            <option value="share">Share of electricity</option>
+            <option value="growth">Growth trend</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="method">
+      <h2>How this is calculated</h2>
+      <p>Official statistics report electricity generation <em>per year</em>, not per second. When this page opens it
+        downloads the latest annual figures for <span data-src-long></span> (currently up to <span data-latest></span>),
+        projects them to <span data-year></span> using each country's latest year-on-year change
+        (<span data-trend-from></span> to <span data-latest></span>), and spreads the result evenly over the year:</p>
+      <pre>growth   = G[latest] / G[latest - 1] - 1
+annual   = G[latest] × (1 + min(growth, 50%))^(this year - latest)
+per sec  = annual ÷ seconds in this year
+so far   = annual × fraction of the year elapsed (UTC)</pre>
+      <p>Real generation swings with the sun, the wind, the seasons and rainfall, so the live counters are a model, not a
+        measurement. Growth used for the projection is capped at 50% a year, because
+        solar in some countries is growing several-fold from a tiny base and would otherwise run away; the
+        <em>Trend / yr</em> on each card still shows the real latest change. Germany is shown separately but is also part of the EU.</p>
+      <p><strong>What the figures cover:</strong> electricity generated from solar, wind, hydropower, bioenergy and other
+        renewables (such as geothermal and tidal). <em>All</em> adds these together. Heat and transport fuels are not
+        included, and neither is nuclear power, which is low-carbon but not renewable.
+        <em>Share of its electricity</em> is the source's share of all electricity that country generated in its latest
+        official year.</p>
+      <p>The small line chart on each card shows that country's official annual generation from
+        <span data-first></span> to <span data-latest></span>, with the dot marking the latest year and the
+        percentage giving the change over the whole period. Each chart is scaled to its own minimum and maximum
+        (it does not start at zero), so compare the shape of the trend rather than the heights between countries.
+        Tap <em>Yearly data</em> (or the chart) to see the values for each year.</p>
+      <p><button type="button" class="link-btn" data-open-help aria-haspopup="dialog">Why does renewable electricity matter? →</button></p>
+      <p class="src">Data: <span data-source></span>, fetched live from
+        <a href="https://ourworldindata.org/renewable-energy" rel="noopener">Our World in Data</a>
+        at <span id="fetched-at"></span>.</p>
+    </section>
+  </main>
+
+  <dialog id="help" aria-labelledby="help-title">
+    <header class="sheet-head">
+      <h2 id="help-title">Why renewable electricity matters</h2>
+      <button type="button" class="close" data-close-help aria-label="Close">×</button>
+    </header>
+    <div class="sheet">
+      <h3>Where the world's electricity came from in <span data-latest></span></h3>
+      <div class="compare" id="mix"></div>
+
+      <h3>Why it matters for the climate</h3>
+      <p>Making electricity is the <b>single biggest source of CO₂</b>, mostly from burning coal and gas. Every megawatt-hour
+        that comes from the sun, the wind or water instead of coal avoids roughly <b>a tonne of CO₂</b> (about half that
+        when it replaces gas).</p>
+      <p>Over their whole life, including building the panels, turbines and dams, wind, solar and hydro emit only
+        <b>a few percent</b> of what coal does for the same electricity.</p>
+      <p class="analogy">💡 If the Emissions Clock is the <b>tap filling the bathtub</b>, this clock shows one of the main ways
+        we are <b>turning the tap down</b>: every unit of clean power is one that doesn't need to burn fuel.</p>
+
+      <h3>Why the share matters as much as the total</h3>
+      <p>Electricity demand keeps growing, so renewables only cut emissions when they grow <b>faster than demand</b> and push
+        fossil fuels out of the mix. That's why each card shows the share of the country's electricity, not just the total.</p>
+
+      <h3>Electricity is only part of the story</h3>
+      <p>Electricity is about a <b>fifth of the energy</b> the world uses. Cars, heating, industry and planes still mostly burn
+        fuel directly, which is why moving them onto clean electricity (electric cars, heat pumps) is the other half of
+        the job.</p>
+      <p class="cmp-note">Sources: Ember; Energy Institute; IPCC AR5 Annex III (life-cycle emissions per unit of electricity);
+        IEA World Energy Outlook.</p>
+
+      <button type="button" class="done" data-close-help>Got it</button>
+    </div>
+  </dialog>
+
+  <footer class="wrap foot">
+    <p><strong>Renewables Clock</strong> estimates how much electricity the world and major economies have generated from
+      solar, wind, hydro and other renewables so far this year, updated every second from official annual data.</p>
+    <p class="related">See also the <a href="https://ramialbatal.github.io/emissions-clock/">Emissions Clock</a> ·
+      Part of <a href="https://ramialbatal.github.io/">AI for things that matter</a></p>
+    <p>Estimates only · data is pulled fresh on every visit</p>
+  </footer>
+
+  <script src="js/config.js?v=20261121a"></script>
+  <script src="js/app.js?v=20261121a"></script>
+</body>
+</html>
