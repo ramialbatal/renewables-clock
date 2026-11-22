@@ -41,7 +41,8 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="css/style.css?v=20261121a">
+  <link rel="stylesheet" href="../shared/clock-base.css?v=20261122a">
+  <link rel="stylesheet" href="css/theme.css?v=20261122a">
 </head>
 <body data-state="loading" data-src="all">
   <header class="top">
@@ -99,6 +100,31 @@
         That was <b id="world-share"></b> of the world's electricity, up from <b id="world-share-first"></b> in <span data-first></span>.</p>
     </section>
 
+    <section class="goal" id="goal" hidden aria-labelledby="goal-title">
+      <div class="goal-head">
+        <h2 id="goal-title">Are we tripling renewables by <span data-cap-target-year></span>?</h2>
+        <span id="cap-verdict" class="verdict">…</span>
+      </div>
+      <p>At COP28, countries agreed to <b>triple the world's renewable power capacity</b> to at least
+        <b id="cap-target"></b> gigawatts (GW) by <span data-cap-target-year></span>, from <b id="cap-base"></b> GW in
+        <span data-cap-base-year></span>. The bar fills as solar panels, wind turbines and other renewable plants are installed.</p>
+      <div class="goal-row">
+        <div class="goal-top"><b>Installed now</b><span class="goal-num" id="cap-now">0</span> <span class="goal-unit">MW</span>
+          <span class="goal-side"><span id="cap-pct">0%</span> of the goal</span></div>
+        <div class="goal-bar"><i id="cap-bar"></i><span id="cap-mark" title="Where capacity should be now to triple on time"></span></div>
+        <div class="goal-legend"><span><i class="sw"></i>Installed (estimated live)</span>
+          <span><i class="sw mark"></i>Where it should be now: <b id="cap-path"></b> GW</span></div>
+      </div>
+      <p class="goal-note">Capacity grew <b id="cap-growth"></b> in <span data-cap-last-year></span>
+        (to <b id="cap-last"></b> GW). Tripling on time now needs <b id="cap-needed"></b> a year until
+        <span data-cap-target-year></span>. In the <em>All</em> view, each country card shows the same test for
+        tripling its own <span data-cap-base-year></span> capacity. That is only a rough guide: the pledge is global, and
+        countries that already get most power from hydro (like Canada or Brazil) are not expected to triple.</p>
+      <p class="src">Capacity: IRENA, Renewable Energy Statistics (end-of-year, excluding pumped storage), via Our World in Data.
+        Goal: COP28 Global Stocktake and the Global Renewables and Energy Efficiency Pledge. "Installed now" extends the
+        latest year's growth; capacity is how much could be generated at full power, not what is generated.</p>
+    </section>
+
     <section aria-label="Countries">
       <div class="bar-head">
         <h2>Major economies</h2>
@@ -107,6 +133,7 @@
             <option value="total">Total generation</option>
             <option value="share">Share of electricity</option>
             <option value="growth">Growth trend</option>
+            <option value="goal">On track to triple</option>
             <option value="name">Name</option>
           </select>
         </label>
@@ -187,7 +214,8 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
     <p>Estimates only · data is pulled fresh on every visit</p>
   </footer>
 
-  <script src="js/config.js?v=20261121a"></script>
-  <script src="js/app.js?v=20261121a"></script>
+  <script src="../shared/clock-core.js?v=20261122a"></script>
+  <script src="js/config.js?v=20261122a"></script>
+  <script src="js/app.js?v=20261122a"></script>
 </body>
 </html>

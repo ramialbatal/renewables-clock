@@ -1,0 +1,15 @@
+/* Renewables Clock: colours and page-specific styles (loaded after ../shared/clock-base.css) */
+:root { --accent: #3ddc84; --accent-2: #b6f36a; --tint: #10291c; --glow: rgba(61,220,132,.35); --on-accent: #06140c; }
+
+/* Each source gets its own colour */
+body[data-src="solar"] { --accent: #ffc53d; --accent-2: #ffe08a; --tint: #2b2410; --glow: rgba(255,197,61,.35); }
+body[data-src="wind"]  { --accent: #5ec8ff; --accent-2: #a9e2ff; --tint: #0f2230; --glow: rgba(94,200,255,.35); }
+body[data-src="hydro"] { --accent: #4f8dff; --accent-2: #9fc0ff; --tint: #121b33; --glow: rgba(79,141,255,.35); }
+/* Mix bars in the help sheet */
+.mix-row { display: grid; grid-template-columns: 92px 1fr 64px; align-items: center; gap: 8px; margin: 6px 0; font-size: .85rem; }
+.mix-row span { color: var(--muted); }
+.mix-row b { font-family: var(--mono); font-weight: 600; text-align: right; }
+.mix-bar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; }
+.mix-bar i { display: block; height: 100%; border-radius: 5px; }
+.related { margin-top: 10px; }
+@media (max-width: 420px) { .gas-switch button { padding: 8px 11px; font-size: .9rem; } }

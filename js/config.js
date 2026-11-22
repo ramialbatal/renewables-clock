@@ -34,6 +34,16 @@ window.RE_CONFIG = {
     wind:  { label: "Wind", short: "Wind", long: "wind electricity", parts: ["wind"] },
     hydro: { label: "Hydro", short: "Hydro", long: "hydroelectricity", parts: ["hydro"] }
   },
+  // COP28 goal: triple renewable capacity to at least 11,000 GW by 2030 (from the 2022 level).
+  // Installed capacity comes from IRENA via Our World in Data's indicator API (values are end-of-year GW).
+  capacity: {
+    indicator: 1305907,   // IRENA "Total renewable capacity" (excludes pumped storage)
+    apiBase: "https://api.ourworldindata.org/v1/indicators/",
+    base: 2022,           // pledge baseline year
+    target: 11000,        // GW, world, by end of targetYear
+    targetYear: 2030,
+    source: "IRENA, Renewable Energy Statistics"
+  },
   defaultSource: "all",
   source: "Ember and Energy Institute, Statistical Review of World Energy",
   sourceUrl: "https://ourworldindata.org/renewable-energy",
