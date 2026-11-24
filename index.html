@@ -67,7 +67,7 @@
   <header class="top">
     <div class="wrap">
       <h1><span data-src-label>Renewable</span> Energy Clock</h1>
-      <p class="sub">Electricity generated so far in <span data-year></span>, estimated live, second by second</p>
+      <p class="sub">How much clean electricity the world makes, live, and whether it is growing fast enough</p>
       <div class="gas-bar">
         <div class="gas-switch" role="group" aria-label="Choose energy source">
           <button type="button" data-src="all" aria-pressed="true">All</button>
@@ -104,24 +104,39 @@
   </div>
 
   <main class="wrap ready-only">
-    <section class="hero" aria-label="World total">
-      <p class="label">🌍 World · <span data-src-label></span> · year to date</p>
-      <div class="big" id="world-num">0</div>
-      <p class="unit">megawatt-hours (MWh) of <span data-src-long></span></p>
-      <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
-      <ul class="stats">
-        <li><b id="world-rate">0</b><span>MWh per second</span></li>
-        <li><b id="world-since">0</b><span>MWh since you opened this page</span></li>
-        <li><b><i id="world-pct">0</i>%</b><span>of <span data-year></span>'s projected <span id="world-annual"></span> TWh</span></li>
-      </ul>
-      <p class="basis">Based on <b id="world-official"></b> TWh officially reported for <span data-latest></span>,
-        <span id="world-growth-word">changing</span> <b id="world-growth"></b> on <span data-trend-from></span>.
-        That was <b id="world-share"></b> of the world's electricity, <span id="world-share-word">compared with</span> <b id="world-share-first"></b> in <span data-first></span>.</p>
+    <!-- 1. The answer, in one line -->
+    <section class="answer" id="answer" data-tone="warn" aria-live="polite">
+      <p class="answer-icon" id="answer-icon" aria-hidden="true"></p>
+      <h2 class="answer-title" id="answer-title"></h2>
+      <p class="answer-text" id="answer-text"></p>
     </section>
 
-    <section class="goal" id="goal" hidden aria-labelledby="goal-title">
+    <!-- 2. The live counter -->
+    <section class="hero" aria-label="World total">
+      <p class="label"><span data-src-label>Renewable</span> electricity made by the world so far in <span data-year></span></p>
+      <div class="big" id="world-num">0</div>
+      <p class="unit">megawatt-hours · about <b id="world-rate">0</b> more every second</p>
+      <p class="since">+<b id="world-since">0</b> MWh since you opened this page</p>
+      <details class="more-info">
+        <summary>More about this number</summary>
+        <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
+        <p><b><i id="world-pct">0</i>%</b> of the year has passed. The world is expected to make about
+          <b id="world-annual"></b> TWh of <span data-src-long></span> in <span data-year></span>, based on <b id="world-official"></b> TWh
+          officially reported for <span data-latest></span> (<span id="world-growth-word">changing</span> <b id="world-growth"></b> on <span data-trend-from></span>).
+          That was <b id="world-share"></b> of the world's electricity, <span id="world-share-word">compared with</span>
+          <b id="world-share-first"></b> in <span data-first></span>. A megawatt-hour (MWh) is roughly what an average European home uses in three months.</p>
+      </details>
+    </section>
+
+    <!-- 3. Where we stand: a few traffic lights -->
+    <section class="standing" aria-labelledby="standing-title">
+      <h2 id="standing-title">Where we stand</h2>
+      <div class="status-grid" id="status-cards"></div>
+      <details class="more-info">
+        <summary>What do these mean?</summary>
+    <div class="goal" id="goal" hidden>
       <div class="goal-head">
-        <h2 id="goal-title">Are we tripling renewables by <span data-cap-target-year></span>?</h2>
+        <h3>Are we tripling renewables by <span data-cap-target-year></span>?</h3>
         <span id="cap-verdict" class="verdict">…</span>
       </div>
       <p>At COP28, countries agreed to <b>triple the world's renewable power capacity</b> to at least
@@ -143,26 +158,32 @@
       <p class="src">Capacity: <span data-cap-source>IRENA, Renewable Energy Statistics</span> (end-of-year, excluding pumped storage), via Our World in Data.
         Goal: COP28 Global Stocktake and the Global Renewables and Energy Efficiency Pledge. "Installed now" extends the
         latest year's growth; capacity is how much could be generated at full power, not what is generated.</p>
+    </div>
+      </details>
     </section>
 
-    <section aria-label="Countries">
+    <!-- 4. Countries -->
+    <section aria-labelledby="countries-title">
       <div class="bar-head">
-        <h2>Major economies</h2>
+        <h2 id="countries-title">Who makes the most</h2>
         <label>Sort by
           <select id="sort">
-            <option value="total">Total generation</option>
-            <option value="share">Share of electricity</option>
-            <option value="growth">Growth trend</option>
-            <option value="goal">On track to triple</option>
+            <option value="total">Most clean power</option>
+            <option value="share">Highest share</option>
+            <option value="growth">Fastest growing</option>
+            <option value="goal">Closest to tripling</option>
             <option value="name">Name</option>
           </select>
         </label>
       </div>
-      <div class="grid" id="grid"></div>
+      <p class="legend"><span class="badge ok">▲ Growing</span> good news · <span class="badge bad">▼ Shrinking</span> moving the wrong way</p>
+      <div class="grid collapsed" id="grid"></div>
+      <p class="show-all-row"><button type="button" class="show-all" id="show-all" hidden>Show all countries</button></p>
     </section>
 
-    <section class="method">
-      <h2>How this is calculated</h2>
+    <!-- 5. All the detail, for those who want it -->
+    <details class="method">
+      <summary><h2>How we calculate this</h2></summary>
       <p>Official statistics report electricity generation <em>per year</em>, not per second. When this page opens it
         downloads the latest annual figures for <span data-src-long></span> (currently up to <span data-latest></span>),
         projects them to <span data-year></span> using each country's latest year-on-year change
@@ -174,22 +195,20 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
       <p>Real generation swings with the sun, the wind, the seasons and rainfall, so the live counters are a model, not a
         measurement. Growth used for the projection is capped at 50% a year, because
         solar in some countries is growing several-fold from a tiny base and would otherwise run away; the
-        <em>Trend / yr</em> on each card still shows the real latest change. Germany is shown separately but is also part of the EU.</p>
+        "Change / yr" in each card's "More" still shows the real latest change. Germany is shown separately but is also part of the EU.</p>
       <p><strong>What the figures cover:</strong> electricity generated from solar, wind, hydropower, bioenergy and other
         renewables (such as geothermal and tidal). <em>All</em> adds these together. Heat and transport fuels are not
         included, and neither is nuclear power, which is low-carbon but not renewable.
         <em>Share of its electricity</em> is the source's share of all electricity that country generated in its latest
         official year.</p>
-      <p>The small line chart on each card shows that country's official annual generation from
-        <span data-first></span> to <span data-latest></span>, with the dot marking the latest year and the
-        percentage giving the change over the whole period. Each chart is scaled to its own minimum and maximum
-        (it does not start at zero), so compare the shape of the trend rather than the heights between countries.
-        Tap <em>Yearly data</em> (or the chart) to see the values for each year.</p>
+      <p>Each country's "More" shows its official yearly figures from <span data-first></span> to <span data-latest></span>
+        as a small chart (scaled to its own range, so compare shapes rather than heights) and a table, and its progress
+        toward tripling its own capacity (in the <em>All</em> view).</p>
       <p><button type="button" class="link-btn" data-open-help aria-haspopup="dialog">Why does renewable electricity matter? →</button></p>
       <p class="src">Data: <span data-source></span>, fetched live from
         <a data-source-url href="https://ourworldindata.org/renewable-energy" rel="noopener">Our World in Data</a>
         at <span id="fetched-at"></span>.</p>
-    </section>
+    </details>
   </main>
 
   <dialog id="help" aria-labelledby="help-title">

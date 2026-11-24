@@ -1,9 +1,9 @@
 // End-to-end smoke test: serves this repository locally, opens the page in headless Chromium at desktop
-// and phone width, and checks that real data loads, counters tick, verdicts show, nothing scrolls sideways,
+// and phone width, and checks that real data loads, counters tick, verdicts show, nothing scrolls sideways
 // no em or en dashes reach the page, and no errors or warnings appear in the console.
 // Settings come from the "smoke" field in package.json.
 //
-//   npm run smoke                        uses the pinned clock-core from jsDelivr
+//   npm run smoke                        uses the pinned clock-core release from jsDelivr
 //   CLOCK_CORE_DIR=../clock-core npm run smoke   serves clock-core from a local checkout instead
 //
 // Needs Playwright with Chromium (CI installs it; see .github/workflows/ci.yml).
@@ -72,6 +72,9 @@ for (const hash of ["", ...(cfg.hashes ?? [])]) {
       const v = await page.evaluate((sel) => document.querySelector(sel)?.textContent?.trim(), s);
       if (!v || v === "…") failures.push(`${name}: verdict ${s} is empty`);
     }
+    // The shared stylesheet really applied (a CSS syntax error fails silently): the answer banner has its colour stripe.
+    const styled = await page.evaluate(() => { const a = document.getElementById("answer"); return !a || parseFloat(getComputedStyle(a).borderTopWidth) > 0; });
+    if (!styled) failures.push(`${name}: clock-core.css did not apply (answer banner has no colour stripe)`);
     const scrollW = await page.evaluate(() => document.documentElement.scrollWidth);
     if (scrollW > Number(w)) failures.push(`${name}: page is ${scrollW}px wide (horizontal scroll)`);
     const text = await page.evaluate(() => document.title + "\n" + document.body.innerText);
