@@ -9,15 +9,18 @@ const close = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} is no
 const header = "entity,code,year," + Object.values(CFG.columns).join(",");
 const row = (entity, code, year, vals) => `${entity},${code},${year},` + Object.keys(CFG.columns).map((k) => vals[k] ?? "").join(",");
 
-test("indexGeneration keeps wanted codes and years, treats blanks as 0, skips empty years", () => {
+const full = { solar: 1, wind: 1, hydro: 1, bio: 1, otherRen: 0, nuclear: 0, gas: 1, oil: 0, coal: 1 };
+
+test("indexGeneration keeps wanted codes and years, treats a few blanks as 0, skips unreported years", () => {
   const csv = [header,
-    row("World", "OWID_WRL", 2014, { solar: 1 }),                       // before historyFrom
-    row("World", "OWID_WRL", 2024, { solar: 10, wind: 20, coal: 70 }),
-    row("Saudi Arabia", "SAU", 2024, { solar: 8, gas: 288 }),           // hydro blank: must not drop the row
-    row("Saudi Arabia", "SAU", 2025, {}),                               // not reported yet: skipped
-    row("Atlantis", "ATL", 2024, { solar: 1 })                          // not wanted
+    row("World", "OWID_WRL", 2014, full),                                         // before historyFrom
+    row("World", "OWID_WRL", 2024, { ...full, solar: 10, wind: 20, coal: 67 }),   // total 100
+    row("Saudi Arabia", "SAU", 2024, { ...full, hydro: "", solar: 8, gas: 288 }), // one blank (no hydro): kept as 0
+    row("Saudi Arabia", "SAU", 2025, {}),                                         // not reported yet: skipped
+    row("Indonesia", "IDN", 2025, { bio: 0, nuclear: 0 }),                        // pre-filled with a few zeros: skipped
+    row("Atlantis", "ATL", 2024, full)                                            // not wanted
   ].join("\n");
-  const d = indexGeneration(parseCsv(csv), ["OWID_WRL", "SAU"], CFG);
+  const d = indexGeneration(parseCsv(csv), ["OWID_WRL", "SAU", "IDN"], CFG);
   assert.deepEqual(Object.keys(d).sort(), ["OWID_WRL", "SAU"]);
   assert.deepEqual(Object.keys(d.OWID_WRL.years), ["2024"]);
   assert.equal(d.OWID_WRL.years[2024].total, 100);
@@ -66,9 +69,21 @@ test("indexCapacity maps entity ids to codes", () => {
 
 test("restOfWorld ignores entries that are part of another (Germany in the EU)", () => {
   const r = restOfWorld({ annual: 100, lastValue: 90, lastYear: 2025 }, [
-    { annual: 30, series: { 2025: 25 } }, { annual: 20, series: { 2025: 15 }, partOf: "EU" }
+    { annual: 30, at: (y) => ({ 2025: 25 })[y] ?? 0 }, { annual: 20, at: (y) => ({ 2025: 15 })[y] ?? 0, partOf: "EU" }
   ]);
   assert.deepEqual(r, { annual: 70, lastValue: 65, lastYear: 2025 });
+});
+
+test("restOfWorld: a country one year behind counts with its projection, not as zero", () => {
+  const lagging = { annual: 12, at: (y) => (y === 2025 ? 11 : 10) };
+  assert.equal(restOfWorld({ annual: 100, lastValue: 90, lastYear: 2025 }, [lagging]).lastValue, 79);
+});
+
+test("capacityModel verdict compares growth as displayed", () => {
+  // 15.5% growth against about 16.4% needed is within 85% of it: "Close"
+  const goal = { base: 2022, targetYear: 2030 };
+  const m = capacityModel({ 2022: 1000, 2024: 1000, 2025: 1155 }, goal, 2484);   // needs ~16.5%, has 15.5%
+  assert.equal(m.verdict.text, "Close");
 });
 
 function zeros() {

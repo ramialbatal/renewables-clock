@@ -47,16 +47,31 @@ function energy(twh) {
   return fmt[0].format(twh * 1000) + " GWh";
 }
 
-/** @param {ReturnType<typeof generationEntry>} e */
-function sparkFor(e) {
+/** @param {ReturnType<typeof generationEntry>} e @param {string} name */
+function sparkFor(e, name) {
   const vals = e.years.map((y) => e.series[y]);
+  if (vals.every((v) => v === 0)) return "";            // e.g. hydro in Saudi Arabia: nothing to chart
   const first = e.years[0], last = e.years[e.years.length - 1];
   const change = vals[0] > 0 ? (vals[vals.length - 1] / vals[0] - 1) * 100 : null;
+  const changeText = change == null ? "new" : C.signed(change) + "%";
   return C.sparkline(e.years, vals, {
-    caption: `${first}-${String(last).slice(2)}`, change,
-    changeText: change == null ? "new" : C.signed(change) + "%", good: "up"
+    caption: `${first}-${String(last).slice(2)}`, change, changeText, good: "up",
+    label: `${name}: annual generation ${first} to ${last}, ${changeText}`
   });
 }
+
+/** For renewables, up is good. @param {number} x @param {number} d decimals shown */
+const goodBadClass = (x, d) => ["bad", "", "good"][C.shownSign(x, d) + 1];
+
+/** "▲ +1.2%" / "▼ -0.8%" / "0.0%", from the value as displayed. @param {number | null} g growth (0.012 = 1.2%) */
+function trendText(g) {
+  if (g == null) return "n/a";
+  const s = C.shownSign(g * 100, 1);
+  return (s > 0 ? "▲ " : s < 0 ? "▼ " : "") + C.signed(g * 100, fmt[1]) + "%";
+}
+
+/** Decimals for a live MWh counter so its last digit moves about once a second or faster. @param {number} mwhPerSec */
+const counterDecimals = (mwhPerSec) => (mwhPerSec >= 1 ? 0 : mwhPerSec >= 0.1 ? 1 : mwhPerSec >= 0.01 ? 2 : 3);
 
 /** @param {ReturnType<typeof generationEntry>} e */
 function historyTable(e) {
@@ -64,7 +79,7 @@ function historyTable(e) {
     const prev = e.series[y - 1];
     const ch = prev ? (e.series[y] / prev - 1) * 100 : null;
     return `<tr><th>${y}</th><td>${energy(e.series[y])}</td><td>${pct(e.shareSeries[y])}</td><td class="${
-      ch == null ? "" : ch > 0 ? "up" : ch < 0 ? "down" : ""}">${ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
+      ch == null ? "" : goodBadClass(ch, 1)}">${ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
   }).join("");
   return `<div class="history" hidden><table><caption>Official annual generation, share of electricity, change</caption>${rows}</table></div>`;
 }
@@ -85,6 +100,7 @@ function cardGoalHtml(m) {
 /** @param {Record<string, Record<number, number>>} cap */
 function renderGoal(cap) {
   const K = CFG.capacity;
+  if (!cap[CFG.world]?.[K.base]) throw new Error(`World capacity for ${K.base} missing`);
   const m = capacityModel(cap[CFG.world], K, K.target);
   C.fill("cap-base-year", K.base);
   C.fill("cap-target-year", K.targetYear);
@@ -136,9 +152,14 @@ function render(data, cap, srcKey) {
   $("world-rate").textContent = fmt[0].format(wRate);
   $("world-annual").textContent = fmt[0].format(world.annual);
   $("world-official").textContent = fmt[0].format(world.lastValue);
-  $("world-growth").textContent = C.signed(world.growth * 100, fmt[1]) + "%";
+  const gSign = C.shownSign(world.growth * 100, 1);
+  $("world-growth-word").textContent = gSign > 0 ? "growing" : gSign < 0 ? "falling" : "flat";
+  $("world-growth").textContent = gSign ? pct(Math.abs(world.growth * 100)) : "";
+  const shareFirst = world.shareSeries[world.years[0]];
+  const sSign = Math.sign(C.shown(world.share, 1) - C.shown(shareFirst, 1));
+  $("world-share-word").textContent = sSign > 0 ? "up from" : sSign < 0 ? "down from" : "the same as";
   $("world-share").textContent = pct(world.share);
-  $("world-share-first").textContent = pct(world.shareSeries[world.years[0]]);
+  $("world-share-first").textContent = pct(shareFirst);
   renderMix(data[CFG.world].years[world.lastYear]);
 
   const grid = $("grid");
@@ -155,7 +176,7 @@ function render(data, cap, srcKey) {
         <span class="flag" aria-hidden="true">${e.flag}</span>
         <h3>${escapeHtml(e.name)}</h3>
         ${e.partOf ? `<span class="tag">part of ${escapeHtml(e.partOf)}</span>` : ""}
-        ${"shareSeries" in e && e.years ? sparkFor(/** @type {any} */ (e)) : ""}
+        ${"shareSeries" in e && e.years ? sparkFor(/** @type {any} */ (e), e.name) : ""}
       </header>
       <div class="ytd"><span class="num">0</span> <small>MWh in ${YEAR}</small></div>
       <div class="bar" title="${e.share != null ? fmt[1].format(e.share) + "% of its electricity" : ""}"><i style="width:${Math.min(e.share ?? 0, 100)}%"></i></div>
@@ -163,8 +184,7 @@ function render(data, cap, srcKey) {
         <div><dt>Share of its electricity</dt><dd>${e.share != null ? pct(e.share) : "n/a"}</dd></div>
         <div><dt>Share of world ${src.label.toLowerCase()}</dt><dd>${pct(shareOfWorld)}</dd></div>
         <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} MWh</dd></div>
-        <div><dt>Trend / yr</dt><dd class="${g == null ? "" : g > 0 ? "up" : g < 0 ? "down" : ""}">${
-          g == null ? "n/a" : (g > 0 ? "▲ +" : g < 0 ? "▼ " : "") + fmt[1].format(g * 100) + "%"}</dd></div>
+        <div><dt>Trend / yr</dt><dd class="${g == null ? "" : goodBadClass(g * 100, 1)}">${trendText(g)}</dd></div>
         <div><dt>${e.lastYear} official</dt><dd>${energy(e.lastValue)}</dd></div>
         <div><dt>${YEAR} projected</dt><dd>${energy(e.annual)}</dd></div>
         <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 MWh</dd></div>
@@ -173,8 +193,9 @@ function render(data, cap, srcKey) {
       ${"shareSeries" in e && e.years ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(/** @type {any} */ (e))}` : ""}`;
     C.wireHistory(el);
     grid.appendChild(el);
+    const rate = perSecond(e.annual);
     return {
-      e, el, rate: perSecond(e.annual),
+      e, el, rate, nf: fmt[counterDecimals(rate)],
       num: el.querySelector(".num"), since: el.querySelector(".since"),
       mark: /** @type {HTMLElement | null} */ (el.querySelector(".cg-mark"))
     };
@@ -183,14 +204,15 @@ function render(data, cap, srcKey) {
   // Sorting ("On track to triple" only in the All view, where cards carry the goal)
   const sortSel = /** @type {HTMLSelectElement} */ ($("sort"));
   const hasGoal = srcKey === "all" && !!cap;
-  /** @type {HTMLOptionElement} */ (sortSel.querySelector('option[value="goal"]')).hidden = !hasGoal;
+  const goalOpt = /** @type {HTMLOptionElement} */ (sortSel.querySelector('option[value="goal"]'));
+  goalOpt.hidden = goalOpt.disabled = !hasGoal;   // Safari ignores "hidden" on options, so also disable it
   if (sortSel.value === "goal" && !hasGoal) sortSel.value = "total";
   /** @type {Record<string, (c: typeof cards[number]) => number | string>} */
   const keys = {
     total: (c) => c.e.annual,
-    share: (c) => c.e.share ?? -1,
-    growth: (c) => c.e.growth ?? -99,
-    goal: (c) => (c.e.cm ? c.e.cm.p.growth - c.e.cm.needed : -99),
+    share: (c) => c.e.share ?? NaN,
+    growth: (c) => c.e.growth ?? NaN,
+    goal: (c) => (c.e.cm ? c.e.cm.p.growth - c.e.cm.needed : NaN),
     name: (c) => c.e.name
   };
   const sortCards = () => C.sortInto(grid, cards, keys[sortSel.value]);
@@ -204,8 +226,8 @@ function render(data, cap, srcKey) {
     setText($("world-pct"), fmt[2].format(frac * 100));
     $("world-bar").style.width = frac * 100 + "%";
     for (const c of cards) {
-      setText(c.num, fmt[0].format(c.e.annual * MWH_PER_TWH * frac));
-      setText(c.since, fmt[0].format(c.rate * elapsed) + " MWh");
+      setText(c.num, c.nf.format(c.e.annual * MWH_PER_TWH * frac));
+      setText(c.since, c.nf.format(c.rate * elapsed) + " MWh");
       if (c.mark && c.e.cm) c.mark.style.left = Math.min(c.e.cm.path(t) / c.e.cm.goal, 1) * 100 + "%";
     }
     goalTick?.(t);
@@ -241,19 +263,30 @@ function applyLabels(key) {
     b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.src === key)));
 }
 
-const capReady = loadCapacity()
-  .then((cap) => { goalTick = renderGoal(cap); return cap; })
-  .catch((err) => { console.error("Capacity data unavailable:", err); return null; });
+// Capacity (for the COP28 goal) loads in the background: the clock renders without it, and the goal
+// section and card bars appear when it arrives. "Try again" retries it if it failed.
+/** @type {Record<string, Record<number, number>> | null} */
+let cap = null;
+function startCapacity() {
+  if (cap) return;
+  loadCapacity()
+    .then((c) => {
+      goalTick = renderGoal(c);
+      cap = c;
+      if (current && document.body.dataset.state === "ready") show(current);   // re-render cards with goal bars
+    })
+    .catch((err) => console.error("Capacity data unavailable:", err));
+}
 
 /** @type {SourceKey | null} */
 let current = null;
 /** @param {string} key */
 async function show(key) {
-  const k = /** @type {SourceKey} */ (key in CFG.sources ? key : CFG.defaultSource);
+  const k = /** @type {SourceKey} */ (Object.hasOwn(CFG.sources, key) ? key : CFG.defaultSource);
   current = k;
   applyLabels(k);
   try {
-    const [{ data, fetchedAt }, cap] = await Promise.all([loadGeneration(), capReady]);
+    const { data, fetchedAt } = await loadGeneration();
     if (current !== k) return;   // switched again while loading
     render(data, cap, k);
     $("fetched-at").textContent = fetchedAt.toLocaleString();
@@ -277,5 +310,6 @@ window.addEventListener("hashchange", () => show(fromHash()));
 C.wireHelp();
 C.fill("year", YEAR);
 C.fill("source", CFG.source);
-$("retry").addEventListener("click", () => { C.setState("loading"); show(current ?? CFG.defaultSource); });
+$("retry").addEventListener("click", () => { C.setState("loading"); startCapacity(); show(current ?? CFG.defaultSource); });
+startCapacity();
 show(fromHash());

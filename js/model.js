@@ -2,7 +2,7 @@
 /**
  * Renewables Clock: pure data and model functions (no DOM, no network). Unit tested in test/model.test.js.
  */
-import { project, neededGrowth, verdict, YEAR } from "clock-core";
+import { project, neededGrowth, verdict, shown, num, YEAR } from "clock-core";
 
 /** @typedef {import("./config.js").Config} Config */
 /** @typedef {import("./config.js").Column} Column */
@@ -12,8 +12,9 @@ import { project, neededGrowth, verdict, YEAR } from "clock-core";
 
 /**
  * Index generation rows (OWID "full" CSV) into { code: { name, years: { year: mix } } }.
- * Keeps only `wanted` codes and years from cfg.historyFrom. Blank cells count as 0, but a row with no values
- * at all, or a total of 0, is skipped (that's how OWID marks a year not yet reported).
+ * Keeps only `wanted` codes and years from cfg.historyFrom. A few blank cells count as 0 (Saudi Arabia has no
+ * hydro figure), but a row with fewer than half its cells filled, or a total of 0, is a year not yet reported
+ * (OWID pre-fills future rows with a few zeros) and is skipped.
  * @param {Record<string, string>[]} rows
  * @param {Iterable<string>} wanted
  * @param {Pick<Config, "columns" | "historyFrom">} cfg
@@ -27,14 +28,14 @@ export function indexGeneration(rows, wanted, cfg) {
   for (const r of rows) {
     if (!keep.has(r.code) || Number(r.year) < cfg.historyFrom) continue;
     const v = /** @type {YearMix} */ ({ total: 0 });
-    let any = false;
+    let filled = 0;
     for (const k of keys) {
-      const x = parseFloat(r[cfg.columns[k]]);
+      const x = num(r[cfg.columns[k]]);
       v[k] = Number.isFinite(x) ? x : 0;
-      if (Number.isFinite(x)) any = true;
+      if (Number.isFinite(x)) filled++;
       v.total += v[k];
     }
-    if (!any || v.total <= 0) continue;
+    if (filled < keys.length / 2 || v.total <= 0) continue;
     (out[r.code] ||= { name: r.entity, years: {} }).years[Number(r.year)] = v;
   }
   return out;
@@ -108,7 +109,8 @@ export function capacityModel(series, goal, target) {
   return {
     p, baseVal, goal: goalGw, needed,
     multiple: p.lastValue / baseVal,
-    verdict: done ? { cls: /** @type {const} */ ("ok"), text: "Tripled" } : verdict(p.growth, needed),
+    // compared as displayed (growth and needed are shown as percentages with 1 decimal)
+    verdict: done ? { cls: /** @type {const} */ ("ok"), text: "Tripled" } : verdict(shown(p.growth * 100, 1), shown(needed * 100, 1)),
     /** @param {number} t fractional year */
     now: (t) => p.lastValue * Math.pow(1 + p.growth, t - tLast),
     /** @param {number} t fractional year */
@@ -118,14 +120,16 @@ export function capacityModel(series, goal, target) {
 
 /**
  * "Rest of world": world minus the listed top-level countries (those not part of another listed entry).
+ * A country whose data ends before the world's latest year counts with its projected value for that year,
+ * so it isn't silently attributed to the rest of the world.
  * @param {{ annual: number, lastValue: number, lastYear: number }} world
- * @param {{ annual: number, series: Series, partOf?: string }[]} entries
+ * @param {{ annual: number, at: (year: number) => number, partOf?: string }[]} entries
  */
 export function restOfWorld(world, entries) {
   const top = entries.filter((e) => !e.partOf);
   return {
     annual: Math.max(world.annual - top.reduce((s, e) => s + e.annual, 0), 0),
-    lastValue: world.lastValue - top.reduce((s, e) => s + (e.series[world.lastYear] || 0), 0),
+    lastValue: world.lastValue - top.reduce((s, e) => s + e.at(world.lastYear), 0),
     lastYear: world.lastYear
   };
 }

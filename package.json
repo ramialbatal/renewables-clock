@@ -9,7 +9,7 @@
   "repository": { "type": "git", "url": "https://github.com/ramialbatal/renewables-clock.git" },
   "homepage": "https://ramialbatal.github.io/renewables-clock/",
   "scripts": {
-    "test": "node --test 'test/**/*.test.js'",
+    "test": "node --test",
     "typecheck": "tsc -p jsconfig.json",
     "style": "node scripts/check-style.js",
     "smoke": "node scripts/smoke.js",
