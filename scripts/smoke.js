@@ -1,6 +1,6 @@
 // End-to-end smoke test: serves this repository locally, opens the page in headless Chromium at desktop
-// and phone width, and checks that real data loads, counters tick, verdicts show, nothing scrolls sideways
-// no em or en dashes reach the page, and no errors or warnings appear in the console.
+// and phone width, and checks that real data loads, counters tick, verdicts show, the header picture paints,
+// nothing scrolls sideways, no em or en dashes reach the page, and no errors or warnings appear in the console.
 // Settings come from the "smoke" field in package.json.
 //
 //   npm run smoke                        uses the pinned clock-core release from jsDelivr
@@ -75,6 +75,14 @@ for (const hash of ["", ...(cfg.hashes ?? [])]) {
     // The shared stylesheet really applied (a CSS syntax error fails silently): the answer banner has its colour stripe.
     const styled = await page.evaluate(() => { const a = document.getElementById("answer"); return !a || parseFloat(getComputedStyle(a).borderTopWidth) > 0; });
     if (!styled) failures.push(`${name}: clock-core.css did not apply (answer banner has no colour stripe)`);
+    // The picture behind the header painted (an error in the scene hides its canvas).
+    const painted = await page.evaluate(() => {
+      const c = document.querySelector("canvas.scene");
+      if (!(c instanceof HTMLCanvasElement)) return true;
+      const px = !c.hidden && c.width ? c.getContext("2d")?.getImageData(c.width >> 1, 4, 1, 1).data : null;
+      return !!px && px[3] > 0;
+    });
+    if (!painted) failures.push(`${name}: the header picture (canvas.scene) did not paint`);
     const scrollW = await page.evaluate(() => document.documentElement.scrollWidth);
     if (scrollW > Number(w)) failures.push(`${name}: page is ${scrollW}px wide (horizontal scroll)`);
     const text = await page.evaluate(() => document.title + "\n" + document.body.innerText);

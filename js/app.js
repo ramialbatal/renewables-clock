@@ -1,12 +1,13 @@
 // @ts-check
 /**
  * Renewables Clock: loads the data, renders the page and runs the live counters.
- * Calculations live in model.js (pure, tested); settings in config.js.
+ * Calculations live in model.js (pure, tested); settings in config.js; the picture behind the header in scene.js.
  */
 import * as C from "clock-core";
 import CFG from "./config.js";
 import { indexGeneration, indexCapacity, generationEntry, capacityModel } from "./model.js";
 import { allHeadline, sourceHeadline, goalStatus, shareStatus, trendBadge } from "./messages.js";
+import { renewablesScene } from "./scene.js";
 
 const { YEAR, fmt, pct, setText, escapeHtml } = C;
 const MWH_PER_TWH = 1e6;
@@ -281,6 +282,7 @@ function renderMix(v) {
 function applyLabels(key) {
   const src = CFG.sources[key];
   document.body.dataset.src = key;
+  scene.redraw();
   document.title = key === "all"
     ? "Live Renewable Energy Clock: World and Countries in Real Time"
     : `Live ${src.label} Power Clock: World and Countries in Real Time`;
@@ -334,6 +336,8 @@ document.querySelectorAll(".gas-switch button").forEach((b) => b.addEventListene
 }));
 window.addEventListener("hashchange", () => show(fromHash()));
 
+const scene = C.startScene(document.querySelector("canvas.scene"), renewablesScene(() => document.body.dataset.src),
+  { groundAt: document.querySelector("header.top") });
 C.wireHelp();
 C.fill("year", YEAR);
 C.fill("source", CFG.source);
