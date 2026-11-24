@@ -161,4 +161,12 @@ export default {
   "a.mix.gas": "Gaz",
   "a.mix.coal": "Charbon",
   "a.mix.oil": "Pétrole",
+
+  // "What can I do?" (js/actions.js)
+  "act.power.t": "Choisir une électricité propre",
+  "act.power.x": "Si vous le pouvez, choisissez une offre d’électricité renouvelable, rejoignez un projet solaire citoyen ou posez des panneaux sur un toit. Dans de nombreux pays, le solaire est désormais l’électricité la moins chère de l’histoire.",
+  "act.efficiency.t": "Consommer mieux",
+  "act.efficiency.x": "Des appareils économes, des ampoules LED et une bonne isolation réduisent nos besoins, et l’électricité propre en couvre une plus grande part. Les pays se sont engagés à doubler les progrès d’efficacité énergétique d’ici 2030.",
+  "act.grids.t": "Demander des raccordements plus rapides",
+  "act.grids.x": "Demandez à vos élus d’accélérer les autorisations et les lignes électriques : au moins 3 000 gigawatts de projets renouvelables attendent d’être raccordés au réseau.",
 };

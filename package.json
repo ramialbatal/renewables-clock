@@ -17,10 +17,11 @@
     "style": "node scripts/check-style.js",
     "smoke": "node scripts/smoke.js",
     "check": "npm run style && npm run typecheck && npm test",
-    "serve": "python3 -m http.server 8000"
+    "serve": "python3 -m http.server 8000",
+    "og-image": "node scripts/og-image.js"
   },
   "devDependencies": {
-    "clock-core": "github:ramialbatal/clock-core#cff672ad58f397a88a956ee1d9cc8266b3e36432",
+    "clock-core": "github:ramialbatal/clock-core#157454638d667a27386df2d947d1da61b1fda596",
     "playwright": "1.48.2",
     "typescript": "5.6.3"
   },

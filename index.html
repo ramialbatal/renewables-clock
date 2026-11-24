@@ -22,6 +22,7 @@
       var l = [q.get("lang"), saved].concat(browser).filter(function (x) { return ok.indexOf(x) >= 0; })[0] || "en";
       h.lang = l; h.dir = l === "ar" ? "rtl" : "ltr";
       if (q.has("embed")) h.setAttribute("data-embed", "");
+      if (q.has("card")) h.setAttribute("data-card", "");   // the weekly link-preview picture (scripts/og-image.js)
       if (l !== "en") {
         h.setAttribute("data-i18n", "pending");
         setTimeout(function () { h.removeAttribute("data-i18n"); }, 4000);   // never stay hidden
@@ -30,6 +31,8 @@
     })();
   </script>
   <meta name="robots" content="index, follow">
+  <!-- Visit counts: GoatCounter, no cookies, no personal data (clock-core startStats) -->
+  <meta name="clock-stats" content="https://ramialbatal.goatcounter.com/count">
   <meta name="google-site-verification" content="3SuQ6XzVcD3pdgYeLcflAI5zGCyUTZUtEPxxrUPsIs4" />
   <meta name="theme-color" content="#0b0f0e">
   <link rel="icon" href="img/icon.svg" type="image/svg+xml">
@@ -66,10 +69,10 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@cff672ad58f397a88a956ee1d9cc8266b3e36432/clock-core.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@157454638d667a27386df2d947d1da61b1fda596/clock-core.css">
   <link rel="stylesheet" href="css/theme.css">
   <!-- clock-core is pinned to an exact commit; to upgrade, change it here, in the CSS link above and in package.json -->
-  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@cff672ad58f397a88a956ee1d9cc8266b3e36432/clock-core.js" } }</script>
+  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@157454638d667a27386df2d947d1da61b1fda596/clock-core.js" } }</script>
   <!-- If the page code can't load (CDN down, very old browser), show the error box instead of a spinner forever -->
   <script>
     function clockLoadFailed() {

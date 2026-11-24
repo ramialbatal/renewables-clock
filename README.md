@@ -11,6 +11,12 @@ It is the companion to the [Emissions Clock](https://ramialbatal.github.io/emiss
 **Languages:** English, French, Spanish and Arabic. The globe at the top switches language; `?lang=fr`, `?lang=es` or
 `?lang=ar` opens one directly. Translations live in `js/i18n/`; corrections from native speakers are very welcome.
 
+**What can I do?** A button under the answer opens three evidence-based actions, each with its source (`js/actions.js`).
+
+**Privacy:** visits are counted anonymously with [GoatCounter](https://www.goatcounter.com/) (no cookies, no
+personal data). The link-preview picture (`img/og-image.png`) is refreshed every Monday by a GitHub Action
+(`npm run og-image`), so shared links show that week's answer and number.
+
 **On your own website:** the "Put this clock on your website" button at the bottom gives a one-line code for a small
 live widget (the answer and the counter), in the language and view you have open. The widget is the same page with
 `?embed=1`.

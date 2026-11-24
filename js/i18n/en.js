@@ -102,4 +102,12 @@ export default {
   "a.mix.gas": "Gas",
   "a.mix.coal": "Coal",
   "a.mix.oil": "Oil",
+
+  // "What can I do?" (js/actions.js)
+  "act.power.t": "Choose clean power",
+  "act.power.x": "If you can, pick a renewable electricity plan, join a community solar project or put panels on a roof. In many places solar is now the cheapest electricity ever.",
+  "act.efficiency.t": "Use energy wisely",
+  "act.efficiency.x": "Efficient appliances, LED bulbs and good insulation cut the power we need, so clean electricity covers more of it. Countries have agreed to double efficiency gains by 2030.",
+  "act.grids.t": "Ask for faster connections",
+  "act.grids.x": "Ask leaders to speed up permits and power lines: at least 3,000 gigawatts of renewable projects are waiting in line to connect to the grid.",
 };
