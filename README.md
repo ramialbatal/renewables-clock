@@ -41,7 +41,7 @@ npm run smoke        # real browser, real data, desktop and phone
 ```
 
 Settings live in `js/config.js`, calculations in `js/model.js` (unit tested), page code in `js/app.js`. Shared helpers
-and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to a release in `index.html`.
+and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to an exact commit in `index.html` and `package.json`.
 How the clocks are built, lessons learned and rules for new code: [developer notes](https://github.com/ramialbatal/clock-core/tree/main/docs).
 
 ## Contributing

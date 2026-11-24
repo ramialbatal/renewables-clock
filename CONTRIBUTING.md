@@ -11,8 +11,8 @@ No build step. Any static server works:
 npm run serve          # same as: python3 -m http.server 8000
 ```
 
-Then open http://localhost:8000. Opening `index.html` straight from disk won't work, because browsers block
-cross-origin data requests from `file://` pages.
+Then open http://localhost:8000. Opening `index.html` straight from disk won't work: browsers block ES modules and
+cross-origin data requests on `file://` pages.
 
 ## Checks
 
@@ -35,8 +35,8 @@ The same checks run automatically on every pull request, and once a week to catc
 | `css/theme.css` | Colours and styles specific to this clock. |
 | `index.html` | Page text, method section, sources. |
 
-Shared helpers and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to a release in
-`index.html`. Don't copy its helpers here: improve clock-core instead.
+Shared helpers and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to an exact commit in
+`index.html` and `package.json`. Don't copy its helpers here: improve clock-core instead.
 
 ## Rules of thumb
 

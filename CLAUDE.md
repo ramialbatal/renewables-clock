@@ -5,8 +5,9 @@
   clock-core's `docs/` (especially `lessons-learned.md` and `adding-a-clock.md`) before changing anything.
 - Plain ES modules, no build step. Settings in `js/config.js`, pure calculations in `js/model.js` (add a test in
   `test/model.test.js` for every change), page code in `js/app.js`.
-- Never copy clock-core helpers into this repo; change clock-core, release it, then bump the pinned version in
-  `index.html` (two URLs).
+- Never copy clock-core helpers into this repo; change clock-core, release it, then bump the pin in three places:
+  the two clock-core URLs in `index.html` and the `clock-core` dev dependency in `package.json`.
+- Colour and verdict logic must compare values as displayed (`C.shown` / `C.shownSign`), never raw numbers.
 - Escape any data text put into HTML with `escapeHtml`; update live numbers only with `setText` inside the ticker.
 - Writing style: no em dashes or en dashes anywhere (text, comments, images). Professional but approachable.
 - Before finishing: `npm run check` and `npm run smoke` (use `CLOCK_CORE_DIR=../clock-core` to test against a local

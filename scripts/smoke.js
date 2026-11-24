@@ -1,15 +1,16 @@
 // End-to-end smoke test: serves this repository locally, opens the page in headless Chromium at desktop
-// and phone width, and checks that real data loads, counters tick, verdicts show, nothing scrolls sideways
-// and no em or en dashes reach the page. Settings come from the "smoke" field in package.json.
+// and phone width, and checks that real data loads, counters tick, verdicts show, nothing scrolls sideways,
+// no em or en dashes reach the page, and no errors or warnings appear in the console.
+// Settings come from the "smoke" field in package.json.
 //
-//   npm run smoke                        uses the pinned clock-core release from jsDelivr
+//   npm run smoke                        uses the pinned clock-core from jsDelivr
 //   CLOCK_CORE_DIR=../clock-core npm run smoke   serves clock-core from a local checkout instead
 //
 // Needs Playwright with Chromium (CI installs it; see .github/workflows/ci.yml).
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { extname, join, resolve } from "node:path";
+import { extname, join, resolve, sep } from "node:path";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -23,7 +24,7 @@ const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/cs
 const server = createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname);
   const file = join(ROOT, path.endsWith("/") ? path + "index.html" : path);
-  if (!file.startsWith(ROOT)) { res.writeHead(403).end(); return; }
+  if (file !== ROOT && !file.startsWith(ROOT + sep)) { res.writeHead(403).end(); return; }
   try {
     const body = await readFile(file);
     res.writeHead(200, { "content-type": TYPES[/** @type {keyof typeof TYPES} */ (extname(file))] ?? "application/octet-stream" }).end(body);
@@ -45,7 +46,8 @@ for (const hash of ["", ...(cfg.hashes ?? [])]) {
     const page = await ctx.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+    // Errors and warnings both fail the test: the clocks warn when a configured country has no data.
+    page.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") errors.push(`${m.type()}: ${m.text()}`); });
     if (CORE_DIR) {
       await page.route(/cdn\.jsdelivr\.net\/gh\/ramialbatal\/clock-core@[^/]+\/(.+)$/, async (route) => {
         const file = route.request().url().replace(/^.*clock-core@[^/]+\//, "");
@@ -74,7 +76,7 @@ for (const hash of ["", ...(cfg.hashes ?? [])]) {
     if (scrollW > Number(w)) failures.push(`${name}: page is ${scrollW}px wide (horizontal scroll)`);
     const text = await page.evaluate(() => document.title + "\n" + document.body.innerText);
     if (DASH.test(text)) failures.push(`${name}: em or en dash in page text`);
-    errors.forEach((e) => failures.push(`${name}: console error: ${e}`));
+    errors.forEach((e) => failures.push(`${name}: console ${e}`));
     console.log(`ok   ${name}`);
     await ctx.close();
   }

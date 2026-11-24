@@ -1,4 +1,4 @@
-/* Renewables Clock: colours and page-specific styles (loaded after ../shared/clock-base.css) */
+/* Renewables Clock: colours and page-specific styles (loaded after clock-core.css) */
 :root { --accent: #3ddc84; --accent-2: #b6f36a; --tint: #10291c; --glow: rgba(61,220,132,.35); --on-accent: #06140c; }
 
 /* Each source gets its own colour */

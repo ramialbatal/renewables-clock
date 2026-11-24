@@ -38,15 +38,30 @@
     "inLanguage": "en",
     "isBasedOn": [
       { "@type": "Dataset", "name": "Yearly electricity data", "description": "Annual electricity generation by source (solar, wind, hydro, bioenergy, nuclear, gas, coal, oil and others) for countries and regions worldwide, published by Ember. Used here for renewable electricity generation and its share of each country's electricity.", "creator": { "@type": "Organization", "name": "Ember" }, "url": "https://ember-energy.org/data/yearly-electricity-data/", "license": "https://creativecommons.org/licenses/by/4.0/", "isAccessibleForFree": true },
+      { "@type": "Dataset", "name": "Renewable Energy Statistics", "description": "Installed renewable electricity capacity by technology for countries and the world, published by IRENA (International Renewable Energy Agency). Used here for the COP28 goal of tripling renewable capacity by 2030.", "creator": { "@type": "Organization", "name": "IRENA" }, "url": "https://www.irena.org/Data", "isAccessibleForFree": true },
       { "@type": "CreativeWork", "name": "Statistical Review of World Energy", "description": "Annual review of world energy statistics by the Energy Institute, combined with Ember data by Our World in Data.", "creator": { "@type": "Organization", "name": "Energy Institute" }, "url": "https://www.energyinst.org/statistical-review" }
     ]
   }
   </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@7f64264169149b91d119f75504cf419cf42475c2/clock-core.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@a797dbe276a74ade23168464fe1fe51b6a48fba6/clock-core.css">
   <link rel="stylesheet" href="css/theme.css">
-  <!-- clock-core is pinned to an exact commit (release V1.0.0); to upgrade, change the version here and in the CSS link above -->
-  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@7f64264169149b91d119f75504cf419cf42475c2/clock-core.js" } }</script>
-  <script type="module" src="js/app.js"></script>
+  <!-- clock-core is pinned to an exact commit; to upgrade, change it here, in the CSS link above and in package.json -->
+  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@a797dbe276a74ade23168464fe1fe51b6a48fba6/clock-core.js" } }</script>
+  <!-- If the page code can't load (CDN down, very old browser), show the error box instead of a spinner forever -->
+  <script>
+    function clockLoadFailed() {
+      var show = function () {
+        document.body.dataset.state = "error";
+        var m = document.getElementById("error-msg");
+        if (m) m.textContent = "The page code could not load. Please check your connection, update your browser, or try again later.";
+        var r = document.getElementById("retry");
+        if (r) r.onclick = function () { location.reload(); };
+      };
+      if (document.body) show(); else document.addEventListener("DOMContentLoaded", show);
+    }
+  </script>
+  <script nomodule>clockLoadFailed();</script>
+  <script type="module" src="js/app.js" onerror="clockLoadFailed()"></script>
 </head>
 <body data-state="loading" data-src="all">
   <header class="top">
@@ -100,8 +115,8 @@
         <li><b><i id="world-pct">0</i>%</b><span>of <span data-year></span>'s projected <span id="world-annual"></span> TWh</span></li>
       </ul>
       <p class="basis">Based on <b id="world-official"></b> TWh officially reported for <span data-latest></span>,
-        growing <b id="world-growth"></b> on <span data-trend-from></span>.
-        That was <b id="world-share"></b> of the world's electricity, up from <b id="world-share-first"></b> in <span data-first></span>.</p>
+        <span id="world-growth-word">changing</span> <b id="world-growth"></b> on <span data-trend-from></span>.
+        That was <b id="world-share"></b> of the world's electricity, <span id="world-share-word">compared with</span> <b id="world-share-first"></b> in <span data-first></span>.</p>
     </section>
 
     <section class="goal" id="goal" hidden aria-labelledby="goal-title">

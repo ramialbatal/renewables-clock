@@ -9,7 +9,7 @@
   "repository": { "type": "git", "url": "https://github.com/ramialbatal/renewables-clock.git" },
   "homepage": "https://ramialbatal.github.io/renewables-clock/",
   "scripts": {
-    "test": "node --test 'test/**/*.test.js'",
+    "test": "node --test",
     "typecheck": "tsc -p jsconfig.json",
     "style": "node scripts/check-style.js",
     "smoke": "node scripts/smoke.js",
@@ -17,7 +17,7 @@
     "serve": "python3 -m http.server 8000"
   },
   "devDependencies": {
-    "clock-core": "github:ramialbatal/clock-core#7f64264169149b91d119f75504cf419cf42475c2",
+    "clock-core": "github:ramialbatal/clock-core#a797dbe276a74ade23168464fe1fe51b6a48fba6",
     "playwright": "1.48.2",
     "typescript": "5.6.3"
   },
