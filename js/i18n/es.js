@@ -161,4 +161,12 @@ export default {
   "a.mix.gas": "Gas",
   "a.mix.coal": "Carbón",
   "a.mix.oil": "Petróleo",
+
+  // "What can I do?" (js/actions.js)
+  "act.power.t": "Elige electricidad limpia",
+  "act.power.x": "Si puedes, contrata una tarifa de electricidad renovable, únete a un proyecto solar comunitario o pon paneles en un tejado. En muchos lugares, la solar ya es la electricidad más barata de la historia.",
+  "act.efficiency.t": "Usa la energía con cabeza",
+  "act.efficiency.x": "Los electrodomésticos eficientes, las bombillas LED y un buen aislamiento reducen la energía que necesitamos, y así la electricidad limpia cubre una parte mayor. Los países acordaron duplicar las mejoras de eficiencia de aquí a 2030.",
+  "act.grids.t": "Pide conexiones más rápidas",
+  "act.grids.x": "Pide a tus representantes que agilicen los permisos y las líneas eléctricas: al menos 3.000 gigavatios de proyectos renovables esperan su conexión a la red.",
 };

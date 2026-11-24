@@ -97,12 +97,14 @@ for (const { query, hash, lang } of runs) {
     // Languages: the right one is on, right to left for Arabic, nothing left hidden or unfilled, same live slots.
     const lg = await page.evaluate(() => ({ lang: document.documentElement.lang, dir: document.documentElement.dir,
       pending: document.documentElement.hasAttribute("data-i18n"), ids: [...document.querySelectorAll("[id]")].map((e) => e.id).sort().join(" "),
-      picker: !!document.querySelector(".lang-pick select"), embedBtn: !!document.querySelector(".embed-open") }));
+      picker: !!document.querySelector(".lang-pick select"), embedBtn: !!document.querySelector(".embed-open"),
+      act: !!document.querySelector(".act-open") }));
     if (lg.lang !== lang) failures.push(`${name}: page language is "${lg.lang}", expected "${lang}"`);
     if (lg.dir !== (lang === "ar" ? "rtl" : "ltr")) failures.push(`${name}: text direction is "${lg.dir}"`);
     if (lg.pending) failures.push(`${name}: page still hidden waiting for its translation`);
     if (!lg.picker) failures.push(`${name}: no language picker`);
     if (!lg.embedBtn) failures.push(`${name}: no "Put this clock on your website" button`);
+    if (!lg.act) failures.push(`${name}: no "What can I do?" button`);
     if (/\{\w+\}/.test(text)) failures.push(`${name}: an unfilled {placeholder} shows on the page`);
     if (!hash && label === "desktop") {
       if (lang === "en") englishIds = lg.ids;

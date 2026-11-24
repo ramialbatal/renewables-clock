@@ -34,6 +34,7 @@ The same checks run automatically on every pull request, and once a week to catc
 | `js/i18n/` | The words in every language: `en.js` holds the words used by the code; `fr.js`, `es.js` and `ar.js` translate those plus every `data-i18n` key in `index.html`. Covered by `test/i18n.test.js`. |
 | `js/messages.js` | Every plain-language message (the answer at the top, traffic lights, badges): tone plus short words. Covered by `test/messages.test.js`. |
 | `js/app.js` | Loading data, building the page, the live ticker. |
+| `js/actions.js` | "What can I do?": three sourced actions; their words are the `act.*` keys in `js/i18n/`. |
 | `js/scene.js` | The animated picture behind the header (run by clock-core's `startScene`). |
 | `css/theme.css` | Colours and styles specific to this clock. |
 | `index.html` | Page text, method section, sources. |
