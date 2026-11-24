@@ -6,7 +6,10 @@
   "type": "module",
   "license": "MIT",
   "author": "Rami Albatal",
-  "repository": { "type": "git", "url": "https://github.com/ramialbatal/renewables-clock.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ramialbatal/renewables-clock.git"
+  },
   "homepage": "https://ramialbatal.github.io/renewables-clock/",
   "scripts": {
     "test": "node --test",
@@ -17,14 +20,24 @@
     "serve": "python3 -m http.server 8000"
   },
   "devDependencies": {
-    "clock-core": "github:ramialbatal/clock-core#93c45766563da0e192a80fd2067d771f4a1ee88b",
+    "clock-core": "github:ramialbatal/clock-core#ec72aeee0db58f067da1658b766a21a229a991f1",
     "playwright": "1.48.2",
     "typescript": "5.6.3"
   },
   "smoke": {
-    "ticking": ["#world-num", "#cap-now"],
-    "verdicts": ["#cap-verdict"],
-    "hashes": ["#solar"]
+    "ticking": [
+      "#world-num",
+      "#cap-now"
+    ],
+    "verdicts": [
+      "#answer-title",
+      "#cap-verdict"
+    ],
+    "hashes": [
+      "#solar"
+    ]
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
