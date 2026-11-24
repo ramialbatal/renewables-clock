@@ -143,7 +143,8 @@ function renderStanding(srcKey, world) {
   }
   cards.push(C.statusCard({ label: `${src.label} power's share`, pct: world.share,
     msg: shareStatus(world.share, world.shareSeries[world.years[0]], world.years[0]) }));
-  cards.push(C.statusCard({ label: "Growing this year?", msg: sourceHeadline(srcKey === "all" ? "Clean" : src.label, world.growth) }));
+  // In a single-source view the answer already says whether it is growing, so the third card is only for "All".
+  if (srcKey === "all") cards.push(C.statusCard({ label: "Growing this year?", msg: sourceHeadline("Clean", world.growth) }));
   $("status-cards").innerHTML = cards.join("");
 }
 
