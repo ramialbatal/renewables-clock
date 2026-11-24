@@ -41,8 +41,11 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../shared/clock-base.css?v=20261122a">
-  <link rel="stylesheet" href="css/theme.css?v=20261122a">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@v1.0.0/clock-core.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <!-- clock-core is pinned to a release; to upgrade, change the version here and in the CSS link above -->
+  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@v1.0.0/clock-core.js" } }</script>
+  <script type="module" src="js/app.js"></script>
 </head>
 <body data-state="loading" data-src="all">
   <header class="top">
@@ -109,7 +112,7 @@
         <b id="cap-target"></b> gigawatts (GW) by <span data-cap-target-year></span>, from <b id="cap-base"></b> GW in
         <span data-cap-base-year></span>. The bar fills as solar panels, wind turbines and other renewable plants are installed.</p>
       <div class="goal-row">
-        <div class="goal-top"><b>Installed now</b><span class="goal-num" id="cap-now">0</span> <span class="goal-unit">MW</span>
+        <div class="goal-top"><b>Installed now</b><span class="goal-num" id="cap-now">0</span> <span class="goal-unit">kW</span>
           <span class="goal-side"><span id="cap-pct">0%</span> of the goal</span></div>
         <div class="goal-bar"><i id="cap-bar"></i><span id="cap-mark" title="Where capacity should be now to triple on time"></span></div>
         <div class="goal-legend"><span><i class="sw"></i>Installed (estimated live)</span>
@@ -214,8 +217,5 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
     <p>Estimates only · data is pulled fresh on every visit</p>
   </footer>
 
-  <script src="../shared/clock-core.js?v=20261122a"></script>
-  <script src="js/config.js?v=20261122a"></script>
-  <script src="js/app.js?v=20261122a"></script>
 </body>
 </html>

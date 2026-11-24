@@ -1,5 +1,7 @@
 # Renewables Clock
 
+![Preview](img/og-image.png)
+
 **Live site: https://ramialbatal.github.io/renewables-clock/**
 
 A static, real-time clock estimating **renewable electricity** generated so far this year for the world and major economies.
@@ -28,3 +30,33 @@ against the target, with a marker for where an even compound path from 2022 woul
 The latest reported year is projected to the current year using each country's latest year-on-year change,
 capped at 50% a year so tiny fast-growing bases don't run away. That total is spread evenly across the year,
 so the counters show year-to-date generation ticking in real time. This is a model, not a live measurement.
+
+## Run it and check it
+
+```sh
+npm run serve        # then open http://localhost:8000
+npm install          # dev tools only: TypeScript checker, Playwright, clock-core (types and tests)
+npm run check        # house style + types + unit tests
+npm run smoke        # real browser, real data, desktop and phone
+```
+
+Settings live in `js/config.js`, calculations in `js/model.js` (unit tested), page code in `js/app.js`. Shared helpers
+and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to a release in `index.html`.
+How the clocks are built, lessons learned and rules for new code: [developer notes](https://github.com/ramialbatal/clock-core/tree/main/docs).
+
+## Contributing
+
+Ideas, fixes and new data sources are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Part of
+[AI for things that matter](https://ramialbatal.github.io/), alongside the
+[Emissions](https://github.com/ramialbatal/emissions-clock), [Renewables](https://github.com/ramialbatal/renewables-clock)
+and [Jobs](https://github.com/ramialbatal/jobs-clock) clocks.
+
+## Licence
+
+Code: [MIT](LICENSE). Data is fetched live from its publishers and stays under their licences:
+
+| Source | Used for | Licence |
+|---|---|---|
+| Ember, Yearly electricity data | electricity generation by source | CC BY 4.0 |
+| Energy Institute, Statistical Review of World Energy | combined with Ember by Our World in Data | see the source's terms |
+| IRENA, Renewable Energy Statistics | installed renewable capacity | see the source's terms |

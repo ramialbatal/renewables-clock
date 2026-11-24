@@ -1,15 +1,33 @@
-/*
- * Which energy sources and countries to show, and where the official data comes from.
+// @ts-check
+/**
+ * Renewables Clock settings: data sources, columns, energy sources, countries and the COP28 goal.
+ * Change things here first; the code reads everything from this object.
  *
- * Data is fetched live in the browser from Our World in Data's grapher API,
- * which sends `Access-Control-Allow-Origin: *`, so no server is needed.
- * One chart (electricity mix, by source) gives yearly electricity
- * generation in TWh by source for every country, from Ember and the
- * Energy Institute Statistical Review of World Energy.
+ * Data is fetched live in the browser from Our World in Data, which sends
+ * `Access-Control-Allow-Origin: *`, so no server is needed:
+ *  - generation by source (TWh/year): Ember and the Energy Institute Statistical Review,
+ *    chart "electricity-mix" (full CSV, filtered in the browser; see docs/lessons-learned in clock-core)
+ *  - installed renewable capacity (GW, end of year): IRENA, via the OWID indicator API
  *
  * To add a country, add its ISO 3166-1 alpha-3 code (OWID uses OWID_* for aggregates).
  */
-window.RE_CONFIG = {
+
+/**
+ * @typedef {"solar" | "wind" | "hydro" | "bio" | "otherRen" | "nuclear" | "gas" | "oil" | "coal"} Column
+ * @typedef {{ label: string, short: string, long: string, parts: Column[] }} Source
+ * @typedef {{ code: string, flag: string, name?: string, partOf?: string }} Country
+ * @typedef {{ indicator: number, apiBase: string, base: number, target: number, targetYear: number, source: string }} CapacityGoal
+ * @typedef {{
+ *   apiBase: string, chart: string, chartParams: Record<string, string>,
+ *   columns: Record<Column, string>, sources: Record<"all" | "solar" | "wind" | "hydro", Source>,
+ *   capacity: CapacityGoal, defaultSource: "all" | "solar" | "wind" | "hydro",
+ *   source: string, sourceUrl: string, historyFrom: number, trendYears: number, maxGrowth: number,
+ *   world: string, countries: Country[]
+ * }} Config
+ */
+
+/** @type {Config} */
+export default {
   apiBase: "https://ourworldindata.org/grapher/",
   // "electricity-prod-source-stacked" now redirects here, and the redirect has no CORS header,
   // so the final address is used directly.
