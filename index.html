@@ -43,10 +43,10 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@a797dbe276a74ade23168464fe1fe51b6a48fba6/clock-core.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@93c45766563da0e192a80fd2067d771f4a1ee88b/clock-core.css">
   <link rel="stylesheet" href="css/theme.css">
   <!-- clock-core is pinned to an exact commit; to upgrade, change it here, in the CSS link above and in package.json -->
-  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@a797dbe276a74ade23168464fe1fe51b6a48fba6/clock-core.js" } }</script>
+  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@93c45766563da0e192a80fd2067d771f4a1ee88b/clock-core.js" } }</script>
   <!-- If the page code can't load (CDN down, very old browser), show the error box instead of a spinner forever -->
   <script>
     function clockLoadFailed() {
@@ -134,12 +134,13 @@
         <div class="goal-legend"><span><i class="sw"></i>Installed (estimated live)</span>
           <span><i class="sw mark"></i>Where it should be now: <b id="cap-path"></b> GW</span></div>
       </div>
-      <p class="goal-note">Capacity grew <b id="cap-growth"></b> in <span data-cap-last-year></span>
+      <p class="goal-note">On track means growing at least as fast as needed; Close, at least 85% as fast; Off track,
+        slower; Going backwards, shrinking. Capacity grew <b id="cap-growth"></b> in <span data-cap-last-year></span>
         (to <b id="cap-last"></b> GW). Tripling on time now needs <b id="cap-needed"></b> a year until
         <span data-cap-target-year></span>. In the <em>All</em> view, each country card shows the same test for
         tripling its own <span data-cap-base-year></span> capacity. That is only a rough guide: the pledge is global, and
         countries that already get most power from hydro (like Canada or Brazil) are not expected to triple.</p>
-      <p class="src">Capacity: IRENA, Renewable Energy Statistics (end-of-year, excluding pumped storage), via Our World in Data.
+      <p class="src">Capacity: <span data-cap-source>IRENA, Renewable Energy Statistics</span> (end-of-year, excluding pumped storage), via Our World in Data.
         Goal: COP28 Global Stocktake and the Global Renewables and Energy Efficiency Pledge. "Installed now" extends the
         latest year's growth; capacity is how much could be generated at full power, not what is generated.</p>
     </section>
@@ -186,7 +187,7 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
         Tap <em>Yearly data</em> (or the chart) to see the values for each year.</p>
       <p><button type="button" class="link-btn" data-open-help aria-haspopup="dialog">Why does renewable electricity matter? →</button></p>
       <p class="src">Data: <span data-source></span>, fetched live from
-        <a href="https://ourworldindata.org/renewable-energy" rel="noopener">Our World in Data</a>
+        <a data-source-url href="https://ourworldindata.org/renewable-energy" rel="noopener">Our World in Data</a>
         at <span id="fetched-at"></span>.</p>
     </section>
   </main>

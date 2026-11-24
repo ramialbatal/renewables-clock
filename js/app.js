@@ -5,7 +5,7 @@
  */
 import * as C from "clock-core";
 import CFG from "./config.js";
-import { indexGeneration, indexCapacity, generationEntry, capacityModel, restOfWorld } from "./model.js";
+import { indexGeneration, indexCapacity, generationEntry, capacityModel } from "./model.js";
 
 const { YEAR, fmt, pct, setText, escapeHtml } = C;
 const MWH_PER_TWH = 1e6;
@@ -61,14 +61,7 @@ function sparkFor(e, name) {
 }
 
 /** For renewables, up is good. @param {number} x @param {number} d decimals shown */
-const goodBadClass = (x, d) => ["bad", "", "good"][C.shownSign(x, d) + 1];
-
-/** "▲ +1.2%" / "▼ -0.8%" / "0.0%", from the value as displayed. @param {number | null} g growth (0.012 = 1.2%) */
-function trendText(g) {
-  if (g == null) return "n/a";
-  const s = C.shownSign(g * 100, 1);
-  return (s > 0 ? "▲ " : s < 0 ? "▼ " : "") + C.signed(g * 100, fmt[1]) + "%";
-}
+const goodBadClass = (x, d) => C.changeClass(x, d, "up");
 
 /** Decimals for a live MWh counter so its last digit moves about once a second or faster. @param {number} mwhPerSec */
 const counterDecimals = (mwhPerSec) => (mwhPerSec >= 1 ? 0 : mwhPerSec >= 0.1 ? 1 : mwhPerSec >= 0.01 ? 2 : 3);
@@ -143,7 +136,7 @@ function render(data, cap, srcKey) {
     const cm = srcKey === "all" && cap?.[c.code]?.[CFG.capacity.base] ? capacityModel(cap[c.code], CFG.capacity) : null;
     return { ...c, ...e, name: c.name || data[c.code].name, cm, rest: false };
   });
-  const row = restOfWorld(world, entries);
+  const row = C.restOfWorld(world, entries);
 
   // Header and method fill-ins
   C.fill("latest", world.lastYear);
@@ -184,7 +177,7 @@ function render(data, cap, srcKey) {
         <div><dt>Share of its electricity</dt><dd>${e.share != null ? pct(e.share) : "n/a"}</dd></div>
         <div><dt>Share of world ${src.label.toLowerCase()}</dt><dd>${pct(shareOfWorld)}</dd></div>
         <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} MWh</dd></div>
-        <div><dt>Trend / yr</dt><dd class="${g == null ? "" : goodBadClass(g * 100, 1)}">${trendText(g)}</dd></div>
+        <div><dt>Trend / yr</dt><dd class="${g == null ? "" : goodBadClass(g * 100, 1)}">${C.trendText(g)}</dd></div>
         <div><dt>${e.lastYear} official</dt><dd>${energy(e.lastValue)}</dd></div>
         <div><dt>${YEAR} projected</dt><dd>${energy(e.annual)}</dd></div>
         <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 MWh</dd></div>
@@ -310,6 +303,8 @@ window.addEventListener("hashchange", () => show(fromHash()));
 C.wireHelp();
 C.fill("year", YEAR);
 C.fill("source", CFG.source);
+C.fill("cap-source", CFG.capacity.source);
+document.querySelectorAll("[data-source-url]").forEach((el) => { if (el instanceof HTMLAnchorElement) el.href = CFG.sourceUrl; });
 $("retry").addEventListener("click", () => { C.setState("loading"); startCapacity(); show(current ?? CFG.defaultSource); });
 startCapacity();
 show(fromHash());

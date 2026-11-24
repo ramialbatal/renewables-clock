@@ -37,6 +37,7 @@ so the counters show year-to-date generation ticking in real time. This is a mod
 npm run serve        # then open http://localhost:8000
 npm install          # dev tools only: TypeScript checker, Playwright, clock-core (types and tests)
 npm run check        # house style + types + unit tests
+npx playwright install chromium   # once, for the smoke test
 npm run smoke        # real browser, real data, desktop and phone
 ```
 
