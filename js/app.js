@@ -55,7 +55,7 @@ function sparkFor(e, name) {
   if (vals.every((v) => v === 0)) return "";            // e.g. hydro in Saudi Arabia: nothing to chart
   const first = e.years[0], last = e.years[e.years.length - 1];
   const change = vals[0] > 0 ? (vals[vals.length - 1] / vals[0] - 1) * 100 : null;
-  const changeText = change == null ? t("a.new") : C.signed(change) + "%";
+  const changeText = change == null ? t("a.new") : C.signedPct(change, 0);
   return C.sparkline(e.years, vals, {
     caption: `${first}-${String(last).slice(2)}`, change, changeText, good: "up",
     label: t("a.spark", { name, first, last, change: changeText })
@@ -74,7 +74,7 @@ function historyTable(e) {
     const prev = e.series[y - 1];
     const ch = prev ? (e.series[y] / prev - 1) * 100 : null;
     return `<tr><th>${y}</th><td>${energy(e.series[y])}</td><td>${pct(e.shareSeries[y])}</td><td class="${
-      ch == null ? "" : goodBadClass(ch, 1)}">${ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
+      ch == null ? "" : goodBadClass(ch, 1)}">${ch == null ? "" : C.signedPct(ch, 1)}</td></tr>`;
   }).join("");
   return `<div class="history" hidden><table><caption>${t("a.history")}</caption>${rows}</table></div>`;
 }
