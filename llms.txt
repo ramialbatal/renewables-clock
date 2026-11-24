@@ -1,0 +1,19 @@
+# Renewables Clock
+
+> A live, browser-based clock estimating renewable electricity (solar, wind, hydro and other renewables) generated so far this year for the world and major economies, and progress toward the COP28 goal of tripling renewable capacity by 2030. URL: https://ramialbatal.github.io/renewables-clock/
+
+## What it shows
+- World and per-country renewable electricity generated so far in the current year, ticking every second, with a switch between all renewables, solar, wind and hydro.
+- Countries: China, United States, India, European Union, Russia, Japan, Iran, Indonesia, Saudi Arabia, South Korea, Germany, Canada, Mexico, Brazil, Türkiye, South Africa, Australia, United Kingdom, plus rest of world.
+- For each: share of its electricity, share of world renewables, latest official figure, projection for the current year, growth trend, history since 2015.
+- A goal section: installed renewable capacity against the COP28 target of 11,000 GW by 2030, with the growth needed and a verdict (On track, Close, Off track).
+
+## Data sources (fetched live from Our World in Data)
+- Electricity generation by source: Ember (yearly electricity data, CC BY 4.0) and the Energy Institute Statistical Review of World Energy.
+- Installed renewable capacity: IRENA, Renewable Energy Statistics.
+
+## Method
+The latest official annual value is projected to the current year using the latest year-on-year change (capped at 50% a year), then spread evenly across the year. The live counters are a model, not a real-time measurement.
+
+## Source code
+https://github.com/ramialbatal/renewables-clock (MIT licence)
