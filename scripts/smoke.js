@@ -39,9 +39,16 @@ const browser = await chromium.launch(proxy ? { proxy: { server: proxy, bypass: 
 const failures = [];
 const DASH = new RegExp("[" + String.fromCharCode(0x2013, 0x2014) + "]");
 
-for (const hash of ["", ...(cfg.hashes ?? [])]) {
+// Every view in English, then each other language, then the embeddable widget (in a small frame).
+const runs = [
+  ...["", ...(cfg.hashes ?? [])].map((hash) => ({ query: "", hash, lang: "en" })),
+  ...["fr", "es", "ar"].map((lang) => ({ query: `?lang=${lang}`, hash: "", lang })),
+];
+/** @type {string | null} ids on the English page, to compare the translations against */
+let englishIds = null;
+for (const { query, hash, lang } of runs) {
   for (const [w, h, label] of [[1280, 900, "desktop"], [375, 800, "phone"]]) {
-    const name = `${label}${hash}`;
+    const name = `${label}${query}${hash}`;
     const ctx = await browser.newContext({ viewport: { width: Number(w), height: Number(h) }, ignoreHTTPSErrors: true });
     const page = await ctx.newPage();
     const errors = [];
@@ -54,7 +61,7 @@ for (const hash of ["", ...(cfg.hashes ?? [])]) {
         route.fulfill({ body: await readFile(join(CORE_DIR, file)), contentType: TYPES[/** @type {keyof typeof TYPES} */ (extname(file))] });
       });
     }
-    await page.goto(base + hash);
+    await page.goto(base + query + hash);
     try {
       await page.waitForFunction(() => document.body.dataset.state === "ready", null, { timeout: 45000 });
     } catch {
@@ -87,10 +94,59 @@ for (const hash of ["", ...(cfg.hashes ?? [])]) {
     if (scrollW > Number(w)) failures.push(`${name}: page is ${scrollW}px wide (horizontal scroll)`);
     const text = await page.evaluate(() => document.title + "\n" + document.body.innerText);
     if (DASH.test(text)) failures.push(`${name}: em or en dash in page text`);
+    // Languages: the right one is on, right to left for Arabic, nothing left hidden or unfilled, same live slots.
+    const lg = await page.evaluate(() => ({ lang: document.documentElement.lang, dir: document.documentElement.dir,
+      pending: document.documentElement.hasAttribute("data-i18n"), ids: [...document.querySelectorAll("[id]")].map((e) => e.id).sort().join(" "),
+      picker: !!document.querySelector(".lang-pick select"), embedBtn: !!document.querySelector(".embed-open") }));
+    if (lg.lang !== lang) failures.push(`${name}: page language is "${lg.lang}", expected "${lang}"`);
+    if (lg.dir !== (lang === "ar" ? "rtl" : "ltr")) failures.push(`${name}: text direction is "${lg.dir}"`);
+    if (lg.pending) failures.push(`${name}: page still hidden waiting for its translation`);
+    if (!lg.picker) failures.push(`${name}: no language picker`);
+    if (!lg.embedBtn) failures.push(`${name}: no "Put this clock on your website" button`);
+    if (/\{\w+\}/.test(text)) failures.push(`${name}: an unfilled {placeholder} shows on the page`);
+    if (!hash && label === "desktop") {
+      if (lang === "en") englishIds = lg.ids;
+      else if (englishIds && lg.ids !== englishIds) failures.push(`${name}: the translated page lost or added elements with ids`);
+    }
     errors.forEach((e) => failures.push(`${name}: console ${e}`));
     console.log(`ok   ${name}`);
     await ctx.close();
   }
+}
+// The widget other sites embed: answer and live number only, fits a small frame, links back to the full clock.
+for (const lang of ["en", "ar"]) {
+  const name = `embed ${lang}`;
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 300 }, ignoreHTTPSErrors: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") errors.push(`${m.type()}: ${m.text()}`); });
+  if (CORE_DIR) {
+    await page.route(/cdn\.jsdelivr\.net\/gh\/ramialbatal\/clock-core@[^/]+\/(.+)$/, async (route) => {
+      const file = route.request().url().replace(/^.*clock-core@[^/]+\//, "");
+      route.fulfill({ body: await readFile(join(CORE_DIR, file)), contentType: TYPES[/** @type {keyof typeof TYPES} */ (extname(file))] });
+    });
+  }
+  await page.goto(base + `?embed=1${lang === "en" ? "" : "&lang=" + lang}`);
+  try {
+    await page.waitForFunction(() => document.body.dataset.state === "ready", null, { timeout: 45000 });
+    await page.waitForTimeout(1500);
+    const e = await page.evaluate(() => ({
+      title: document.getElementById("answer-title")?.textContent?.trim(),
+      credit: /** @type {HTMLAnchorElement | null} */ (document.querySelector(".embed-credit"))?.href ?? "",
+      gridShown: !!document.getElementById("grid")?.offsetParent,
+      wide: document.documentElement.scrollWidth > innerWidth,
+      bottom: Math.ceil(/** @type {HTMLElement} */ (document.querySelector(".embed-credit"))?.getBoundingClientRect().bottom ?? 9999),
+    }));
+    if (!e.title) failures.push(`${name}: no answer`);
+    if (!e.credit || e.credit.includes("embed=")) failures.push(`${name}: no link back to the full clock (${e.credit})`);
+    if (e.gridShown) failures.push(`${name}: the country list shows in the widget`);
+    if (e.wide) failures.push(`${name}: the widget scrolls sideways`);
+    if (e.bottom > 300) failures.push(`${name}: the widget is taller than its 300px frame (${e.bottom}px)`);
+  } catch { failures.push(`${name}: never reached "ready"`); }
+  errors.forEach((x) => failures.push(`${name}: console ${x}`));
+  console.log(`ok   ${name}`);
+  await ctx.close();
 }
 await browser.close();
 server.close();

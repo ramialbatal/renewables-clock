@@ -67,7 +67,7 @@ export function renewablesScene(source) {
       const count = Math.max(3, Math.round(w / 200));
       for (let i = 0; i < count; i++) {
         const layer = i % 3 === 1 ? 1 : 0, x = ((i + 0.2 + rnd() * 0.6) / count) * w;
-        turbines.push({ x, y: hillY(layer, x) + 2, size: G * (layer ? 0.3 : 0.2) * (0.85 + rnd() * 0.3), speed: 0.7 + rnd() * 0.5, phase: rnd() * 6, layer });
+        turbines.push({ x, y: hillY(layer, x) + 2, size: G * (layer ? 0.3 : 0.2) * (w < 600 ? 0.75 : 1) * (0.85 + rnd() * 0.3), speed: 0.7 + rnd() * 0.5, phase: rnd() * 6, layer });
       }
       // Solar panels on the near hill, left and right of the middle (the title sits above the middle)
       panels = [0.13, 0.9].map((p) => ({ x: w * p, y: hillY(2, w * p), n: w < 600 ? 2 : 4, size: Math.max(20, G * 0.075) }));
@@ -95,7 +95,7 @@ export function renewablesScene(source) {
 
       // The sun, with slowly turning rays (bigger and brighter in the solar view)
       // Low in the sky, beside the hills and below the header text
-      const sx = w * (w < 600 ? 0.8 : 0.76), sy = G * 0.66, sr = Math.min(w, G) * 0.075 * (1 + focus.solar * 0.25);
+      const sx = w * (w < 600 ? 0.8 : 0.76), sy = G * (w < 600 ? 0.74 : 0.66), sr = Math.min(w, G) * 0.075 * (1 + focus.solar * 0.25);
       ctx.save(); ctx.translate(sx, sy); ctx.rotate(t * 0.03);
       ctx.fillStyle = rgba(SUN, 0.05 + focus.solar * 0.05);
       for (let i = 0; i < 12; i++) {

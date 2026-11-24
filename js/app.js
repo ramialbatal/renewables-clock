@@ -6,10 +6,10 @@
 import * as C from "clock-core";
 import CFG from "./config.js";
 import { indexGeneration, indexCapacity, generationEntry, capacityModel } from "./model.js";
-import { allHeadline, sourceHeadline, goalStatus, shareStatus, trendBadge } from "./messages.js";
+import { allHeadline, sourceHeadline, goalStatus, shareStatus, trendBadge, upFirst } from "./messages.js";
 import { renewablesScene } from "./scene.js";
 
-const { YEAR, fmt, pct, setText, escapeHtml } = C;
+const { YEAR, fmt, pct, setText, escapeHtml, t } = C;
 const MWH_PER_TWH = 1e6;
 /** @param {string} id */
 const $ = (id) => /** @type {HTMLElement} */ (document.getElementById(id));
@@ -55,10 +55,10 @@ function sparkFor(e, name) {
   if (vals.every((v) => v === 0)) return "";            // e.g. hydro in Saudi Arabia: nothing to chart
   const first = e.years[0], last = e.years[e.years.length - 1];
   const change = vals[0] > 0 ? (vals[vals.length - 1] / vals[0] - 1) * 100 : null;
-  const changeText = change == null ? "new" : C.signed(change) + "%";
+  const changeText = change == null ? t("a.new") : C.signed(change) + "%";
   return C.sparkline(e.years, vals, {
     caption: `${first}-${String(last).slice(2)}`, change, changeText, good: "up",
-    label: `${name}: annual generation ${first} to ${last}, ${changeText}`
+    label: t("a.spark", { name, first, last, change: changeText })
   });
 }
 
@@ -76,18 +76,18 @@ function historyTable(e) {
     return `<tr><th>${y}</th><td>${energy(e.series[y])}</td><td>${pct(e.shareSeries[y])}</td><td class="${
       ch == null ? "" : goodBadClass(ch, 1)}">${ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
   }).join("");
-  return `<div class="history" hidden><table><caption>Official annual generation, share of electricity, change</caption>${rows}</table></div>`;
+  return `<div class="history" hidden><table><caption>${t("a.history")}</caption>${rows}</table></div>`;
 }
 
 /** @param {ReturnType<typeof capacityModel>} m */
 function cardGoalHtml(m) {
   const { base, targetYear } = CFG.capacity;
   return `<div class="card-goal">
-      <div class="goal-bar" title="Installed renewable capacity toward 3× its ${base} level by ${targetYear}">
+      <div class="goal-bar" title="${escapeHtml(t("a.cardGoalTitle", { base, year: targetYear }))}">
         <i style="width:${Math.min(m.multiple / 3, 1) * 100}%"></i><span class="cg-mark"></span></div>
-      <p><span>Capacity ×${fmt[1].format(m.multiple)} vs ${base} · goal ×3 by ${targetYear}</span>
-        <span class="verdict ${m.verdict.cls}" title="Growth ${pct(m.p.growth * 100)} a year${
-          m.verdict.text === "Tripled" ? "" : `, needs ${pct(m.needed * 100)}`}">${m.verdict.text}</span></p>
+      <p><span>${escapeHtml(t("a.cardGoal", { multiple: fmt[1].format(m.multiple), base, year: targetYear }))}</span>
+        <span class="verdict ${m.verdict.cls}" title="${escapeHtml(t("a.cardGrowth", { pct: pct(m.p.growth * 100) }) +
+          (m.verdict.key === "tripled" ? "" : t("a.cardNeeds", { pct: pct(m.needed * 100) })))}">${escapeHtml(m.verdict.text)}</span></p>
     </div>`;
 }
 
@@ -105,23 +105,23 @@ function renderGoal(cap) {
   $("cap-last").textContent = fmt[0].format(m.p.lastValue);
   $("cap-growth").textContent = pct(m.p.growth * 100);
   $("cap-needed").textContent = pct(m.needed * 100);
-  C.showVerdict($("cap-verdict"), m.verdict);
+  C.showVerdict($("cap-verdict"), { ...m.verdict, key: m.verdict.key === "tripled" ? "onTrack" : m.verdict.key });
   $("goal").hidden = false;
   worldCap = m;
-  /** @param {number} t */
-  return (t) => {
-    const now = m.now(t);
+  /** @param {number} ty  time in fractional years */
+  return (ty) => {
+    const now = m.now(ty);
     setText($("cap-now"), fmt[0].format(now * 1e6));    // kW: capacity grows about 25 kW a second, so MW would barely move
     setText($("cap-pct"), pct((now / K.target) * 100, 2));
     $("cap-bar").style.width = Math.min(now / K.target, 1) * 100 + "%";
-    $("cap-mark").style.left = Math.min(m.path(t) / K.target, 1) * 100 + "%";
-    setText($("cap-path"), fmt[0].format(m.path(t)));
+    $("cap-mark").style.insetInlineStart = Math.min(m.path(ty) / K.target, 1) * 100 + "%";   // mirrors in right-to-left pages
+    setText($("cap-path"), fmt[0].format(m.path(ty)));
   };
 }
 
 // ---- Page ------------------------------------------------------------------------------
 const T0 = Date.now();                 // page-open time, shared by all sources
-/** @type {((t: number) => void) | null} */
+/** @type {((ty: number) => void) | null} */
 let goalTick = null;                   // set once capacity data arrives
 /** @type {ReturnType<typeof capacityModel> | null} */
 let worldCap = null;                   // world tripling-goal model, once capacity data arrives
@@ -131,21 +131,21 @@ let worldCap = null;                   // world tripling-goal model, once capaci
  * @param {SourceKey} srcKey @param {ReturnType<typeof generationEntry>} world
  */
 function renderStanding(srcKey, world) {
-  const K = CFG.capacity, src = CFG.sources[srcKey];
+  const K = CFG.capacity;
   C.showAnswer(srcKey === "all"
-    ? allHeadline(worldCap?.verdict.text ?? null, world.growth, K.targetYear)
-    : sourceHeadline(src.label, world.growth));
+    ? allHeadline(worldCap?.verdict.key ?? null, world.growth, K.targetYear)
+    : sourceHeadline(srcKey, world.growth));
   const cards = [];
   if (worldCap) {
     const pctOfGoal = (worldCap.now(C.tYears()) / K.target) * 100;
-    cards.push(C.statusCard({ label: `Goal: triple clean power by ${K.targetYear}`, pct: pctOfGoal,
-      barLabel: `${fmt[0].format(pctOfGoal)}% of the goal`,
-      msg: goalStatus(worldCap.verdict.text, pctOfGoal, worldCap.p.growth, worldCap.needed) }));
+    cards.push(C.statusCard({ label: t("a.goalLabel", { year: K.targetYear }), pct: pctOfGoal,
+      barLabel: t("a.ofGoal", { pct: pct(pctOfGoal, 0) }),
+      msg: goalStatus(worldCap.verdict.key, pctOfGoal, worldCap.p.growth, worldCap.needed) }));
   }
-  cards.push(C.statusCard({ label: `${src.label} power's share`, pct: world.share,
+  cards.push(C.statusCard({ label: upFirst(t("a.shareOf", { power: t(`msg.power.${srcKey}`) })), pct: world.share,
     msg: shareStatus(world.share, world.shareSeries[world.years[0]], world.years[0]) }));
   // In a single-source view the answer already says whether it is growing, so the third card is only for "All".
-  if (srcKey === "all") cards.push(C.statusCard({ label: "Growing this year?", msg: sourceHeadline("Clean", world.growth) }));
+  if (srcKey === "all") cards.push(C.statusCard({ label: t("a.growingYet"), msg: sourceHeadline("clean", world.growth) }));
   $("status-cards").innerHTML = cards.join("");
 }
 
@@ -156,13 +156,14 @@ function renderStanding(srcKey, world) {
  */
 function render(data, cap, srcKey) {
   const src = CFG.sources[srcKey];
+  const srcText = C.tOr(`src.${srcKey}.inText`, src.label.toLowerCase());   // the source's name inside a sentence
   const world = generationEntry(data[CFG.world], src.parts, CFG);
   const wRate = perSecond(world.annual);
 
   const entries = CFG.countries.filter((c) => data[c.code]).map((c) => {
     const e = generationEntry(data[c.code], src.parts, CFG);
     const cm = srcKey === "all" && cap?.[c.code]?.[CFG.capacity.base] ? capacityModel(cap[c.code], CFG.capacity) : null;
-    return { ...c, ...e, name: c.name || data[c.code].name, cm, rest: false };
+    return { ...c, ...e, name: C.regionName(C.flagRegion(c.flag), c.name || data[c.code].name), cm, rest: false };
   });
   const row = C.restOfWorld(world, entries);
 
@@ -174,11 +175,11 @@ function render(data, cap, srcKey) {
   $("world-annual").textContent = fmt[0].format(world.annual);
   $("world-official").textContent = fmt[0].format(world.lastValue);
   const gSign = C.shownSign(world.growth * 100, 1);
-  $("world-growth-word").textContent = gSign > 0 ? "growing" : gSign < 0 ? "falling" : "flat";
+  $("world-growth-word").textContent = t(gSign > 0 ? "a.growing" : gSign < 0 ? "a.falling" : "a.flat");
   $("world-growth").textContent = gSign ? pct(Math.abs(world.growth * 100)) : "";
   const shareFirst = world.shareSeries[world.years[0]];
   const sSign = Math.sign(C.shown(world.share, 1) - C.shown(shareFirst, 1));
-  $("world-share-word").textContent = sSign > 0 ? "up from" : sSign < 0 ? "down from" : "the same as";
+  $("world-share-word").textContent = t(sSign > 0 ? "a.upFrom" : sSign < 0 ? "a.downFrom" : "a.sameAs");
   $("world-share").textContent = pct(world.share);
   $("world-share-first").textContent = pct(shareFirst);
   renderMix(data[CFG.world].years[world.lastYear]);
@@ -186,7 +187,7 @@ function render(data, cap, srcKey) {
 
   const grid = $("grid");
   grid.innerHTML = "";
-  const all = [...entries, { code: "ROW", flag: "🌐", name: "Rest of world", rest: true, partOf: undefined, ...row,
+  const all = [...entries, { code: "ROW", flag: "🌐", name: t("a.rest"), rest: true, partOf: undefined, ...row,
     growth: null, share: null, years: null, cm: null }];
   const cards = all.map((e) => {
     const shareOfWorld = (e.annual / world.annual) * 100;
@@ -198,25 +199,26 @@ function render(data, cap, srcKey) {
       <header>
         <span class="flag" aria-hidden="true">${e.flag}</span>
         <h3>${escapeHtml(e.name)}</h3>
-        ${e.partOf ? `<span class="tag">part of ${escapeHtml(e.partOf)}</span>` : ""}
+        ${e.partOf ? `<span class="tag">${escapeHtml(t("a.partOf", { name: C.regionName(e.partOf, e.partOf) }))}</span>` : ""}
         ${C.badge(badge.tone, badge.label)}
       </header>
-      <div class="ytd"><span class="num">0</span> <small>MWh in ${YEAR}</small></div>
-      <div class="bar" title="${e.share != null ? fmt[1].format(e.share) + "% of its electricity" : ""}"><i style="width:${Math.min(e.share ?? 0, 100)}%"></i></div>
-      <p class="share">${e.share != null ? `${fmt[0].format(e.share)}% of its electricity is ${escapeHtml(src.label.toLowerCase())}` : `${fmt[0].format(shareOfWorld)}% of the world's ${escapeHtml(src.label.toLowerCase())} power`}</p>
+      <div class="ytd"><span class="num">0</span> <small>${escapeHtml(t("a.mwhIn", { year: YEAR }))}</small></div>
+      <div class="bar" title="${e.share != null ? escapeHtml(t("a.shareTitle", { pct: pct(e.share, 1) })) : ""}"><i style="width:${Math.min(e.share ?? 0, 100)}%"></i></div>
+      <p class="share">${escapeHtml(e.share != null ? t("a.shareIs", { pct: pct(e.share, 0), name: srcText })
+        : t("a.shareWorld", { pct: pct(shareOfWorld, 0), name: srcText }))}</p>
       <details class="more-info">
-        <summary>More</summary>
+        <summary>${t("a.more")}</summary>
         ${"shareSeries" in e && e.years ? sparkFor(/** @type {any} */ (e), e.name) : ""}
         <dl>
-          <div><dt>Share of world ${escapeHtml(src.label.toLowerCase())}</dt><dd>${pct(shareOfWorld)}</dd></div>
-          <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} MWh</dd></div>
-          <div><dt>Change / yr</dt><dd class="${g == null ? "" : goodBadClass(g * 100, 1)}">${C.trendText(g)}</dd></div>
-          <div><dt>${e.lastYear} official</dt><dd>${energy(e.lastValue)}</dd></div>
-          <div><dt>${YEAR} expected</dt><dd>${energy(e.annual)}</dd></div>
-          <div><dt>Since you opened this page</dt><dd class="since">0 MWh</dd></div>
+          <div><dt>${escapeHtml(t("a.shareOfWorld", { name: srcText }))}</dt><dd>${pct(shareOfWorld)}</dd></div>
+          <div><dt>${t("a.perSecond")}</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} MWh</dd></div>
+          <div><dt>${t("a.change")}</dt><dd class="${g == null ? "" : goodBadClass(g * 100, 1)}">${C.trendText(g)}</dd></div>
+          <div><dt>${t("a.official", { year: e.lastYear })}</dt><dd>${energy(e.lastValue)}</dd></div>
+          <div><dt>${t("a.expected", { year: YEAR })}</dt><dd>${energy(e.annual)}</dd></div>
+          <div><dt>${t("a.since")}</dt><dd class="since">0 MWh</dd></div>
         </dl>
         ${e.cm ? cardGoalHtml(e.cm) : ""}
-        ${"shareSeries" in e && e.years ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(/** @type {any} */ (e))}` : ""}
+        ${"shareSeries" in e && e.years ? `<button type="button" class="more" aria-expanded="false">${t("core.yearly")} <span aria-hidden="true">▾</span></button>${historyTable(/** @type {any} */ (e))}` : ""}
       </details>`;
     C.wireHistory(el);
     grid.appendChild(el);
@@ -248,7 +250,7 @@ function render(data, cap, srcKey) {
   C.wireShowAll(grid, $("show-all"), cards.length);
 
   C.startTicker((now) => {
-    const frac = C.yearFraction(now), t = C.tYears(now), elapsed = (now - T0) / 1000;
+    const frac = C.yearFraction(now), ty = C.tYears(now), elapsed = (now - T0) / 1000;
     setText($("world-num"), C.digits(fmt[0].format(world.annual * MWH_PER_TWH * frac)), true);
     setText($("world-since"), fmt[0].format(wRate * elapsed));
     setText($("world-pct"), fmt[2].format(frac * 100));
@@ -256,9 +258,9 @@ function render(data, cap, srcKey) {
     for (const c of cards) {
       setText(c.num, c.nf.format(c.e.annual * MWH_PER_TWH * frac));
       setText(c.since, c.nf.format(c.rate * elapsed) + " MWh");
-      if (c.mark && c.e.cm) c.mark.style.left = Math.min(c.e.cm.path(t) / c.e.cm.goal, 1) * 100 + "%";
+      if (c.mark && c.e.cm) c.mark.style.insetInlineStart = Math.min(c.e.cm.path(ty) / c.e.cm.goal, 1) * 100 + "%";
     }
-    goalTick?.(t);
+    goalTick?.(ty);
   });
 }
 
@@ -266,9 +268,9 @@ function render(data, cap, srcKey) {
 function renderMix(v) {
   /** @type {[string, number, string][]} */
   const rows = [
-    ["Solar", v.solar, "#ffc53d"], ["Wind", v.wind, "#5ec8ff"], ["Hydro", v.hydro, "#4f8dff"],
-    ["Bioenergy & other", v.bio + v.otherRen, "#3ddc84"], ["Nuclear", v.nuclear, "#c9a2ff"],
-    ["Gas", v.gas, "#8c9a95"], ["Coal", v.coal, "#5d6661"], ["Oil", v.oil, "#6f6a5e"]
+    [t("a.mix.solar"), v.solar, "#ffc53d"], [t("a.mix.wind"), v.wind, "#5ec8ff"], [t("a.mix.hydro"), v.hydro, "#4f8dff"],
+    [t("a.mix.bio"), v.bio + v.otherRen, "#3ddc84"], [t("a.mix.nuclear"), v.nuclear, "#c9a2ff"],
+    [t("a.mix.gas"), v.gas, "#8c9a95"], [t("a.mix.coal"), v.coal, "#5d6661"], [t("a.mix.oil"), v.oil, "#6f6a5e"]
   ];
   const max = Math.max(...rows.map((r) => r[1]));
   $("mix").innerHTML = rows.map(([name, x, color]) => `
@@ -283,11 +285,10 @@ function applyLabels(key) {
   const src = CFG.sources[key];
   document.body.dataset.src = key;
   scene.redraw();
-  document.title = key === "all"
-    ? "Live Renewable Energy Clock: World and Countries in Real Time"
-    : `Live ${src.label} Power Clock: World and Countries in Real Time`;
-  C.fill("src-label", src.label);
-  C.fill("src-long", src.long);
+  document.title = t(`meta.title.${key}`);
+  C.fill("src-label", C.tOr(`src.${key}.label`, src.label));
+  C.fill("src-text", C.tOr(`src.${key}.inText`, src.label.toLowerCase()));   // the name inside a sentence (lower case in French)
+  C.fill("src-long", C.tOr(`src.${key}.long`, src.long));
   document.querySelectorAll(".gas-switch button").forEach((b) =>
     b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.src === key)));
 }
@@ -318,7 +319,7 @@ async function show(key) {
     const { data, fetchedAt } = await loadGeneration();
     if (current !== k) return;   // switched again while loading
     render(data, cap, k);
-    $("fetched-at").textContent = fetchedAt.toLocaleString();
+    $("fetched-at").textContent = fetchedAt.toLocaleString(C.locale());
     C.setState("ready");
   } catch (err) {
     if (current !== k) return;
@@ -336,6 +337,9 @@ document.querySelectorAll(".gas-switch button").forEach((b) => b.addEventListene
 }));
 window.addEventListener("hashchange", () => show(fromHash()));
 
+// Language first (the inline script in index.html chose it), so everything below is drawn in it.
+await C.startLanguage((code) => import(`./i18n/${code}.js`), document.querySelector("header.top .wrap"));
+C.wireEmbed(document.querySelector("footer.foot"));
 const scene = C.startScene(document.querySelector("canvas.scene"), renewablesScene(() => document.body.dataset.src),
   { groundAt: document.querySelector("header.top") });
 C.wireHelp();

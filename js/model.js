@@ -2,13 +2,15 @@
 /**
  * Renewables Clock: pure data and model functions (no DOM, no network). Unit tested in test/model.test.js.
  */
-import { project, neededGrowth, verdict, shown, num, YEAR } from "clock-core";
+import { project, neededGrowth, verdict, shown, num, t, YEAR } from "clock-core";
 
 /** @typedef {import("./config.js").Config} Config */
 /** @typedef {import("./config.js").Column} Column */
 /** @typedef {Record<Column, number> & { total: number }} YearMix  TWh by source for one year, plus the total. */
 /** @typedef {{ name: string, years: Record<number, YearMix> }} Entity */
 /** @typedef {Record<number, number>} Series */
+/** @typedef {import("clock-core").Verdict["key"] | "tripled"} GoalKey  a verdict key, or "tripled" once the goal is met */
+/** @typedef {{ cls: import("clock-core").Verdict["cls"], key: GoalKey, text: string }} GoalVerdict */
 
 /**
  * Index generation rows (OWID "full" CSV) into { code: { name, years: { year: mix } } }.
@@ -111,7 +113,8 @@ export function capacityModel(series, goal, target) {
     p, baseVal, goal: goalGw, needed,
     multiple,
     // compared as displayed (growth and needed are shown as percentages with 1 decimal)
-    verdict: done ? { cls: /** @type {const} */ ("ok"), text: "Tripled" } : verdict(shown(p.growth * 100, 1), shown(needed * 100, 1)),
+    /** @type {GoalVerdict} */
+    verdict: done ? { cls: "ok", key: "tripled", text: t("goal.tripled") } : verdict(shown(p.growth * 100, 1), shown(needed * 100, 1)),
     /** @param {number} t fractional year */
     now: (t) => p.lastValue * Math.pow(1 + p.growth, t - tLast),
     /** @param {number} t fractional year */

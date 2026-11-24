@@ -31,6 +31,7 @@ The same checks run automatically on every pull request, and once a week to catc
 |---|---|
 | `js/config.js` | Settings: data sources, countries, goals. Start here. |
 | `js/model.js` | Calculations as pure functions (no page, no network). Covered by `test/model.test.js`. |
+| `js/i18n/` | The words in every language: `en.js` holds the words used by the code; `fr.js`, `es.js` and `ar.js` translate those plus every `data-i18n` key in `index.html`. Covered by `test/i18n.test.js`. |
 | `js/messages.js` | Every plain-language message (the answer at the top, traffic lights, badges): tone plus short words. Covered by `test/messages.test.js`. |
 | `js/app.js` | Loading data, building the page, the live ticker. |
 | `js/scene.js` | The animated picture behind the header (run by clock-core's `startScene`). |
