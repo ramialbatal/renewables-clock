@@ -20,7 +20,7 @@
     "serve": "python3 -m http.server 8000"
   },
   "devDependencies": {
-    "clock-core": "github:ramialbatal/clock-core#ec72aeee0db58f067da1658b766a21a229a991f1",
+    "clock-core": "github:ramialbatal/clock-core#ec9413e351bcc56a3583a3cb9060c0c75d97fdad",
     "playwright": "1.48.2",
     "typescript": "5.6.3"
   },

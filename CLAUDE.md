@@ -5,7 +5,8 @@
   clock-core's `docs/` (especially `lessons-learned.md` and `adding-a-clock.md`) before changing anything.
 - Plain ES modules, no build step. Settings in `js/config.js`, pure calculations in `js/model.js` (add a test in
   `test/model.test.js` for every change), plain-language messages in `js/messages.js` (tested in
-  `test/messages.test.js`), page code in `js/app.js`.
+  `test/messages.test.js`), page code in `js/app.js`, the animated picture behind the header in `js/scene.js` (keep the
+  title readable over it; check screenshots at laptop and phone width).
 - Page design: answer first, in plain words with a colour (green, amber, red); one short sentence per point; every
   number, method or source behind "More" or "How we calculate this". No jargon in what a visitor sees first.
 - Never copy clock-core helpers into this repo; change clock-core, release it, then bump the pin in three places:
