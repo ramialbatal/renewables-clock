@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseCsv } from "clock-core";
-import { indexGeneration, indexCapacity, seriesFor, generationEntry, capacityModel, restOfWorld } from "../js/model.js";
+import { indexGeneration, indexCapacity, seriesFor, generationEntry, capacityModel } from "../js/model.js";
 import CFG from "../js/config.js";
 
 const close = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} is not close to ${b}`);
@@ -67,16 +67,10 @@ test("indexCapacity maps entity ids to codes", () => {
   assert.deepEqual(indexCapacity(data, meta, ["OWID_WRL"]), { OWID_WRL: { 2022: 3379, 2025: 5155 } });
 });
 
-test("restOfWorld ignores entries that are part of another (Germany in the EU)", () => {
-  const r = restOfWorld({ annual: 100, lastValue: 90, lastYear: 2025 }, [
-    { annual: 30, at: (y) => ({ 2025: 25 })[y] ?? 0 }, { annual: 20, at: (y) => ({ 2025: 15 })[y] ?? 0, partOf: "EU" }
-  ]);
-  assert.deepEqual(r, { annual: 70, lastValue: 65, lastYear: 2025 });
-});
-
-test("restOfWorld: a country one year behind counts with its projection, not as zero", () => {
-  const lagging = { annual: 12, at: (y) => (y === 2025 ? 11 : 10) };
-  assert.equal(restOfWorld({ annual: 100, lastValue: 90, lastYear: 2025 }, [lagging]).lastValue, 79);
+test("capacityModel: Tripled is judged on the multiple as displayed", () => {
+  const goal = { base: 2022, targetYear: 2030 };
+  assert.equal(capacityModel({ 2022: 100, 2024: 290, 2025: 296 }, goal).verdict.text, "Tripled");   // x2.96 shows as x3.0
+  assert.notEqual(capacityModel({ 2022: 100, 2024: 290, 2025: 294 }, goal).verdict.text, "Tripled"); // x2.94 shows as x2.9
 });
 
 test("capacityModel verdict compares growth as displayed", () => {

@@ -105,31 +105,16 @@ export function capacityModel(series, goal, target) {
   const goalGw = target ?? baseVal * 3;
   const tBase = goal.base + 1, tGoal = goal.targetYear + 1, tLast = p.lastYear + 1;
   const needed = neededGrowth(p.lastValue, goalGw, tGoal - tLast);
-  const done = p.lastValue >= goalGw;
+  const multiple = p.lastValue / baseVal;
+  const done = shown(p.lastValue / goalGw * 3, 1) >= 3;   // "Tripled" when the multiple of the goal, as displayed, reaches 3.0
   return {
     p, baseVal, goal: goalGw, needed,
-    multiple: p.lastValue / baseVal,
+    multiple,
     // compared as displayed (growth and needed are shown as percentages with 1 decimal)
     verdict: done ? { cls: /** @type {const} */ ("ok"), text: "Tripled" } : verdict(shown(p.growth * 100, 1), shown(needed * 100, 1)),
     /** @param {number} t fractional year */
     now: (t) => p.lastValue * Math.pow(1 + p.growth, t - tLast),
     /** @param {number} t fractional year */
     path: (t) => baseVal * Math.pow(goalGw / baseVal, (t - tBase) / (tGoal - tBase))
-  };
-}
-
-/**
- * "Rest of world": world minus the listed top-level countries (those not part of another listed entry).
- * A country whose data ends before the world's latest year counts with its projected value for that year,
- * so it isn't silently attributed to the rest of the world.
- * @param {{ annual: number, lastValue: number, lastYear: number }} world
- * @param {{ annual: number, at: (year: number) => number, partOf?: string }[]} entries
- */
-export function restOfWorld(world, entries) {
-  const top = entries.filter((e) => !e.partOf);
-  return {
-    annual: Math.max(world.annual - top.reduce((s, e) => s + e.annual, 0), 0),
-    lastValue: world.lastValue - top.reduce((s, e) => s + e.at(world.lastYear), 0),
-    lastYear: world.lastYear
   };
 }

@@ -9,12 +9,13 @@
  *    chart "electricity-mix" (full CSV, filtered in the browser; see docs/lessons-learned in clock-core)
  *  - installed renewable capacity (GW, end of year): IRENA, via the OWID indicator API
  *
- * To add a country, add its ISO 3166-1 alpha-3 code (OWID uses OWID_* for aggregates).
+ * To add a country, add { code, flag } to `countries` (ISO 3166-1 alpha-3 code; OWID uses OWID_* for aggregates;
+ * the name comes from the data, or set `name`), then add it to the country list in llms.txt.
  */
 
 /**
  * @typedef {"solar" | "wind" | "hydro" | "bio" | "otherRen" | "nuclear" | "gas" | "oil" | "coal"} Column
- * @typedef {{ label: string, short: string, long: string, parts: Column[] }} Source
+ * @typedef {{ label: string, long: string, parts: Column[] }} Source
  * @typedef {{ code: string, flag: string, name?: string, partOf?: string }} Country
  * @typedef {{ indicator: number, apiBase: string, base: number, target: number, targetYear: number, source: string }} CapacityGoal
  * @typedef {{
@@ -46,11 +47,11 @@ export default {
     coal: "coal_generation__twh"
   },
   sources: {
-    all:   { label: "Renewable", short: "All renewables", long: "renewable electricity (solar, wind, hydro, bioenergy and other renewables)",
+    all:   { label: "Renewable", long: "renewable electricity (solar, wind, hydro, bioenergy and other renewables)",
              parts: ["solar", "wind", "hydro", "bio", "otherRen"] },
-    solar: { label: "Solar", short: "Solar", long: "solar electricity", parts: ["solar"] },
-    wind:  { label: "Wind", short: "Wind", long: "wind electricity", parts: ["wind"] },
-    hydro: { label: "Hydro", short: "Hydro", long: "hydroelectricity", parts: ["hydro"] }
+    solar: { label: "Solar", long: "solar electricity", parts: ["solar"] },
+    wind:  { label: "Wind", long: "wind electricity", parts: ["wind"] },
+    hydro: { label: "Hydro", long: "hydroelectricity", parts: ["hydro"] }
   },
   // COP28 goal: triple renewable capacity to at least 11,000 GW by 2030 (from the 2022 level).
   // Installed capacity comes from IRENA via Our World in Data's indicator API (values are end-of-year GW).
