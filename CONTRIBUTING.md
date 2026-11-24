@@ -31,6 +31,7 @@ The same checks run automatically on every pull request, and once a week to catc
 |---|---|
 | `js/config.js` | Settings: data sources, countries, goals. Start here. |
 | `js/model.js` | Calculations as pure functions (no page, no network). Covered by `test/model.test.js`. |
+| `js/messages.js` | Every plain-language message (the answer at the top, traffic lights, badges): tone plus short words. Covered by `test/messages.test.js`. |
 | `js/app.js` | Loading data, building the page, the live ticker. |
 | `css/theme.css` | Colours and styles specific to this clock. |
 | `index.html` | Page text, method section, sources. |
