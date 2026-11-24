@@ -7,6 +7,8 @@
 - Countries: China, United States, India, European Union, Russia, Japan, Iran, Indonesia, Saudi Arabia, South Korea, Germany, Canada, Mexico, Brazil, Türkiye, South Africa, Australia, United Kingdom, plus rest of world.
 - For each: share of its electricity, share of world renewables, latest official figure, projection for the current year, growth trend, history since 2015.
 - A goal section: installed renewable capacity against the COP28 target of 11,000 GW by 2030, with the growth needed and a verdict (On track, Close, Off track).
+- Languages: English, French (?lang=fr), Spanish (?lang=es) and Arabic (?lang=ar).
+- An embeddable widget for other websites: https://ramialbatal.github.io/renewables-clock/?embed=1 (add &lang=fr, es or ar, and #solar, #wind or #hydro).
 
 ## Data sources (fetched live from Our World in Data)
 - Electricity generation by source: Ember (yearly electricity data, CC BY 4.0) and the Energy Institute Statistical Review of World Energy.

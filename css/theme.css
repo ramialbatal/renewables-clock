@@ -8,8 +8,14 @@ body[data-src="hydro"] { --accent: #4f8dff; --accent-2: #9fc0ff; --tint: #121b33
 /* Mix bars in the help sheet */
 .mix-row { display: grid; grid-template-columns: 92px 1fr 64px; align-items: center; gap: 8px; margin: 6px 0; font-size: .85rem; }
 .mix-row span { color: var(--muted); }
-.mix-row b { font-family: var(--mono); font-weight: 600; text-align: right; }
+.mix-row b { font-family: var(--mono); font-weight: 600; text-align: end; }
 .mix-bar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; }
 .mix-bar i { display: block; height: 100%; border-radius: 5px; }
 .related { margin-top: 10px; }
 @media (max-width: 420px) { .gas-switch button { padding: 8px 11px; font-size: .9rem; } }
+
+/* Four source buttons plus "?" must fit a 375px phone in every language (Spanish is the longest): tighter padding */
+@media (max-width: 420px) {
+  .gas-switch button { padding: 8px clamp(7px, 2.2vw, 14px); }
+  .gas-bar { gap: 6px; }
+}

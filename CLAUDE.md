@@ -13,6 +13,9 @@
   the two clock-core URLs in `index.html` and the `clock-core` dev dependency in `package.json`.
 - Colour and verdict logic must compare values as displayed (`C.shown` / `C.shownSign`), never raw numbers.
 - Escape any data text put into HTML with `escapeHtml`; update live numbers only with `setText` inside the ticker.
+- Languages: English, French, Spanish, Arabic (right to left). Visible text in `index.html` carries `data-i18n` keys;
+  words used by the code live in `js/i18n/en.js` and are read with `C.t()`. Any new or changed text needs all four
+  languages (`test/i18n.test.js` fails otherwise). See clock-core's `docs/how-it-works.md`, "Languages".
 - Writing style: no em dashes or en dashes anywhere (text, comments, images). Professional but approachable.
 - Before finishing: `npm run check` and `npm run smoke` (use `CLOCK_CORE_DIR=../clock-core` to test against a local
   clock-core checkout).

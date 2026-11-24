@@ -2,69 +2,69 @@
 /**
  * Renewables Clock: the plain-language messages shown to visitors. Pure functions, unit tested.
  * Each returns a clock-core Message (tone, icon, short title, one sentence). Keep them short and free of jargon;
- * numbers and method details belong behind "More".
+ * numbers and method details belong behind "More". The words are in js/i18n/ (English in en.js).
  */
-import { shown, shownSign, fmt, pct, message } from "clock-core";
+import { shown, shownSign, pct, message, t, locale, addStrings } from "clock-core";
+import en from "./i18n/en.js";
+
+addStrings("en", en);   // the English words; app.js adds the visitor's language on top
 
 /** @typedef {import("clock-core").Message} Message */
 /** @typedef {import("clock-core").Tone} Tone */
+/** @typedef {import("./model.js").GoalKey} GoalKey  "tripled", "onTrack", "close", "offTrack" or "backwards" */
+/** @typedef {"clean" | "all" | "solar" | "wind" | "hydro"} PowerKey */
+
+/**
+ * Text with its first letter capitalised, for a message that starts with a source's name ("{power} is booming":
+ * "Solar power is booming", "L’énergie solaire est en plein essor"). Arabic has no capitals and is left as it is.
+ * @param {string} s
+ */
+export const upFirst = (s) => s.charAt(0).toLocaleUpperCase(locale()) + s.slice(1);
+
+/** @param {GoalKey | ""} key @returns {Exclude<GoalKey, "">} */
+const goalKey = (key) => (key === "tripled" || key === "onTrack" || key === "close" || key === "offTrack" ? key : "backwards");
 
 /**
  * The one-line answer at the top of the "All renewables" view, from the tripling-goal verdict.
  * Until capacity data arrives, falls back to whether clean power is growing.
- * @param {string | null} goalText  "Tripled", "On track", "Close", "Off track", "Going backwards", or null if unknown
- * @param {number} growth           world renewable generation, yearly change (0.086 = +8.6%)
+ * @param {GoalKey | null} goal  verdict key from capacityModel, or null if unknown
+ * @param {number} growth        world renewable generation, yearly change (0.086 = +8.6%)
  * @param {number} targetYear
  * @returns {Message}
  */
-export function allHeadline(goalText, growth, targetYear) {
-  switch (goalText) {
-    case "Tripled": return message("ok", "Renewables have tripled",
-      `The world has already met its goal of tripling clean power by ${targetYear}.`);
-    case "On track": return message("ok", "On track to triple clean power",
-      `Solar, wind and other clean power are growing fast enough to triple by ${targetYear}.`);
-    case "Close": return message("warn", "Almost on track",
-      `Clean power is growing fast, but not quite fast enough to triple by ${targetYear}.`);
-    case "Off track": return message("warn", "Growing, but too slowly",
-      `Clean power is growing, but far too slowly to triple by ${targetYear}.`);
-    case "Going backwards": return message("bad", "Clean power is shrinking",
-      `The world is moving away from its goal of tripling clean power by ${targetYear}.`);
-    default: return sourceHeadline("Clean", growth);
-  }
+export function allHeadline(goal, growth, targetYear) {
+  if (goal == null) return sourceHeadline("clean", growth);
+  const k = goalKey(goal);
+  const tone = k === "tripled" || k === "onTrack" ? "ok" : k === "backwards" ? "bad" : "warn";
+  return message(tone, t(`msg.all.${k}.t`), t(`msg.all.${k}.x`, { year: targetYear }));
 }
 
 /**
  * The answer for a single source (solar, wind, hydro), from its world yearly growth as displayed.
- * @param {string} name     "Solar", "Wind", "Hydro" or "Clean" (the title adds " power")
- * @param {number} growth   yearly change (0.3 = +30%)
+ * @param {PowerKey} key   which source ("clean" for all renewables in a sentence about growth)
+ * @param {number} growth  yearly change (0.3 = +30%)
  * @returns {Message}
  */
-export function sourceHeadline(name, growth) {
+export function sourceHeadline(key, growth) {
   const g = shown(growth * 100, 1), s = Math.sign(g);
-  const by = `${fmt[1].format(Math.abs(g))}% in the latest year`;
-  if (g >= 10) return message("ok", `${name} power is booming`, `It grew ${by}. Every unit of it means less coal and gas burned.`);
-  if (s > 0) return message("ok", `${name} power is growing`, `It grew ${by}, replacing some coal and gas.`);
-  if (s === 0) return message("warn", `${name} power isn't growing`, "It stayed about the same in the latest year.");
-  return message("bad", `${name} power is falling`, `It fell ${by}. Dry years can cut hydropower, for example.`);
+  const [tone, k] = g >= 10 ? ["ok", "boom"] : s > 0 ? ["ok", "up"] : s === 0 ? ["warn", "flat"] : ["bad", "down"];
+  return message(/** @type {Tone} */ (tone), upFirst(t(`msg.src.${k}.t`, { power: t(`msg.power.${key}`) })), t(`msg.src.${k}.x`, { pct: pct(Math.abs(g), 1) }));
 }
 
 /**
  * Traffic light: the tripling goal (installed capacity).
- * @param {string} goalText   verdict text from capacityModel
+ * @param {GoalKey} goal      verdict key from capacityModel
  * @param {number} pctOfGoal  installed now as % of the goal (53.3)
  * @param {number} growth     latest yearly growth of capacity (0.155)
  * @param {number} needed     growth needed per year to triple on time (0.164)
  * @returns {Message}
  */
-export function goalStatus(goalText, pctOfGoal, growth, needed) {
-  const text = `${fmt[0].format(pctOfGoal)}% of the way there. Growing ${pct(growth * 100)} a year; needs ${pct(needed * 100)}.`;
-  switch (goalText) {
-    case "Tripled": return message("ok", "Goal reached", `${fmt[0].format(pctOfGoal)}% of the goal installed.`);
-    case "On track": return message("ok", "On track", text);
-    case "Close": return message("warn", "Almost there", text);
-    case "Off track": return message("warn", "Too slow", text);
-    default: return message("bad", "Going backwards", text);
-  }
+export function goalStatus(goal, pctOfGoal, growth, needed) {
+  const k = goalKey(goal);
+  if (k === "tripled") return message("ok", t("msg.goal.tripled"), t("msg.goal.done", { pct: pct(pctOfGoal, 0) }));
+  const text = t("msg.goal.text", { pct: pct(pctOfGoal, 0), growth: pct(growth * 100), needed: pct(needed * 100) });
+  const tone = k === "onTrack" ? "ok" : k === "backwards" ? "bad" : "warn";
+  return message(tone, t(`msg.goal.${k}`), text);
 }
 
 /**
@@ -76,10 +76,10 @@ export function goalStatus(goalText, pctOfGoal, growth, needed) {
  */
 export function shareStatus(share, shareFirst, firstYear) {
   const now = shown(share, 1), then = shown(shareFirst, 1);
-  const title = `${fmt[0].format(now)}% of the world's electricity`;
-  if (now > then) return message("ok", title, `Up from ${pct(then)} in ${firstYear}, a growing part of the world's power.`);
-  if (now < then) return message("bad", title, `Down from ${pct(then)} in ${firstYear}, a shrinking part of the world's power.`);
-  return message("warn", title, `The same as in ${firstYear}.`);
+  const title = t("msg.share.t", { pct: pct(now, 0) });
+  if (now > then) return message("ok", title, t("msg.share.up", { pct: pct(then), year: firstYear }));
+  if (now < then) return message("bad", title, t("msg.share.down", { pct: pct(then), year: firstYear }));
+  return message("warn", title, t("msg.share.same", { year: firstYear }));
 }
 
 /**
@@ -90,5 +90,5 @@ export function shareStatus(share, shareFirst, firstYear) {
 export function trendBadge(growth) {
   if (growth == null) return { tone: "", label: "" };
   const s = shownSign(growth * 100, 1);
-  return s > 0 ? { tone: "ok", label: "▲ Growing" } : s < 0 ? { tone: "bad", label: "▼ Shrinking" } : { tone: "warn", label: "● Steady" };
+  return s > 0 ? { tone: "ok", label: t("msg.badge.up") } : s < 0 ? { tone: "bad", label: t("msg.badge.down") } : { tone: "warn", label: t("msg.badge.flat") };
 }
