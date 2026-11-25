@@ -81,7 +81,7 @@ export default {
   "help.done": "Compris",
 
   "f.about": "<strong>L’Horloge des renouvelables</strong> estime la quantité d’électricité produite depuis le début de l’année par le monde et les grandes économies grâce au solaire, à l’éolien, à l’hydraulique et aux autres renouvelables. Elle est mise à jour chaque seconde à partir des données annuelles officielles.",
-  "f.related": "Voir aussi l’<a href=\"https://ramialbatal.github.io/emissions-clock/\">Horloge des émissions</a>, l’<a href=\"https://ramialbatal.github.io/jobs-clock/\">Horloge de l’emploi</a> et l’<a href=\"https://ramialbatal.github.io/peace-clock/\">Horloge de la paix</a> · Fait partie de <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
+  "f.related": "Voir aussi l’<a href=\"https://ramialbatal.github.io/emissions-clock/\">Horloge des émissions</a>, l’<a href=\"https://ramialbatal.github.io/jobs-clock/\">Horloge de l’emploi</a>, l’<a href=\"https://ramialbatal.github.io/peace-clock/\">Horloge de la paix</a> et l’<a href=\"https://ramialbatal.github.io/warming-clock/\">Horloge du réchauffement</a> · Fait partie de <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
   "f.links": "Estimations uniquement · données actualisées à chaque visite",
 
   "msg.power.clean": "l’énergie propre",
