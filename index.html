@@ -69,10 +69,13 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@dfec615ab765b96a94e7886f6082d8ee0bb60de1/clock-core.css">
+  <!-- Open the connection to the data source early: the numbers come from there -->
+  <link rel="preconnect" href="https://ourworldindata.org" crossorigin>
+  <link rel="preconnect" href="https://api.ourworldindata.org" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@10b93b009608fa8a97369f04c34776c7ddfd5984/clock-core.css">
   <link rel="stylesheet" href="css/theme.css">
   <!-- clock-core is pinned to an exact commit; to upgrade, change it here, in the CSS link above and in package.json -->
-  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@dfec615ab765b96a94e7886f6082d8ee0bb60de1/clock-core.js" } }</script>
+  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@10b93b009608fa8a97369f04c34776c7ddfd5984/clock-core.js" } }</script>
   <!-- If the page code can't load (CDN down, very old browser), show the error box instead of a spinner forever -->
   <script>
     function clockLoadFailed() {
@@ -216,7 +219,7 @@
         downloads the latest annual figures for <span data-src-long></span> (currently up to <span data-latest></span>),
         projects them to <span data-year></span> using each country's latest year-on-year change
         (<span data-trend-from></span> to <span data-latest></span>), and spreads the result evenly over the year:</p>
-      <pre data-i18n="m.formula">growth   = G[latest] / G[latest - 1] - 1
+      <pre tabindex="0" data-i18n="m.formula">growth   = G[latest] / G[latest - 1] - 1
 annual   = G[latest] × (1 + min(growth, 50%))^(this year - latest)
 per sec  = annual ÷ seconds in this year
 so far   = annual × fraction of the year elapsed (UTC)</pre>
