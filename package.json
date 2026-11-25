@@ -21,7 +21,7 @@
     "og-image": "node scripts/og-image.js"
   },
   "devDependencies": {
-    "clock-core": "github:ramialbatal/clock-core#84e352e5510444ec758efc82d2b522de74582b3d",
+    "clock-core": "github:ramialbatal/clock-core#dfec615ab765b96a94e7886f6082d8ee0bb60de1",
     "playwright": "1.48.2",
     "typescript": "5.6.3"
   },
