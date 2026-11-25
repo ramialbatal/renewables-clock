@@ -80,7 +80,7 @@ export default {
   "help.done": "فهمت",
 
   "f.about": "<strong>ساعة الطاقة المتجددة</strong> تقدّر كمية الكهرباء التي ولّدها العالم والاقتصادات الكبرى من الشمس والرياح والمياه وغيرها من المصادر المتجددة منذ بداية العام، وتُحدَّث كل ثانية بناءً على البيانات السنوية الرسمية.",
-  "f.related": "اطّلع أيضًا على <a href=\"https://ramialbatal.github.io/emissions-clock/\">ساعة الانبعاثات</a> و<a href=\"https://ramialbatal.github.io/jobs-clock/\">ساعة الوظائف</a> · جزء من مشروع <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
+  "f.related": "اطّلع أيضًا على <a href=\"https://ramialbatal.github.io/emissions-clock/\">ساعة الانبعاثات</a> و<a href=\"https://ramialbatal.github.io/jobs-clock/\">ساعة الوظائف</a> و<a href=\"https://ramialbatal.github.io/peace-clock/\">ساعة السلام</a> · جزء من مشروع <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
   "f.links": "تقديرات فقط · تُجلب البيانات من جديد في كل زيارة",
 
   "msg.power.clean": "الطاقة النظيفة",
