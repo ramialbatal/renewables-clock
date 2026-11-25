@@ -81,7 +81,7 @@ export default {
   "help.done": "Entendido",
 
   "f.about": "<strong>El Reloj de renovables</strong> estima cuánta electricidad han generado en lo que va de año el mundo y las grandes economías con energía solar, eólica, hidráulica y otras renovables, actualizado cada segundo a partir de datos anuales oficiales.",
-  "f.related": "Mira también el <a href=\"https://ramialbatal.github.io/emissions-clock/\">Reloj de emisiones</a> y el <a href=\"https://ramialbatal.github.io/jobs-clock/\">Reloj del empleo</a> · Forma parte de <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
+  "f.related": "Mira también el <a href=\"https://ramialbatal.github.io/emissions-clock/\">Reloj de emisiones</a>, el <a href=\"https://ramialbatal.github.io/jobs-clock/\">Reloj del empleo</a> y el <a href=\"https://ramialbatal.github.io/peace-clock/\">Reloj de la paz</a> · Forma parte de <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
   "f.links": "Son estimaciones · los datos se actualizan en cada visita",
 
   "msg.power.clean": "la energía limpia",
