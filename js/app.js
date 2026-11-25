@@ -350,6 +350,5 @@ C.fill("year", YEAR);
 C.fill("source", CFG.source);
 C.fill("cap-source", CFG.capacity.source);
 document.querySelectorAll("[data-source-url]").forEach((el) => { if (el instanceof HTMLAnchorElement) el.href = CFG.sourceUrl; });
-$("retry").addEventListener("click", () => { C.setState("loading"); startCapacity(); show(current ?? CFG.defaultSource); });
 startCapacity();
 show(fromHash());
